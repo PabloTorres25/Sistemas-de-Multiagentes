@@ -10,6 +10,8 @@ import numpy as np
 # Data manipulation and analysis.
 import pandas as pd
 
+import random
+
 class MoneyAgent(mesa.Agent):
     """An agent with fixed initial wealth."""
 
@@ -18,12 +20,12 @@ class MoneyAgent(mesa.Agent):
         super().__init__(unique_id, model)
 
         # Create the agent's variable and set the initial values.
-        self.wealth = 1
+        self.wealth = random.randint(0,100)
 
     def step(self):
         # The agent's step will go here.
         # For demonstration purposes we will print the agent's unique_id
-        print(f"Hi, I am an agent, you can call me {str(self.unique_id)}.")
+        print(f"Hi, I am an agent, you can call me {str(self.unique_id)}. and I have a wealth of {str(self.wealth)}")
 
 class MoneyModel(mesa.Model):
     """A model with some number of agents."""
