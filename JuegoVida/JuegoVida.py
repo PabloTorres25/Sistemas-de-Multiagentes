@@ -70,7 +70,7 @@ class GameLifeModel(Model):
         self.schedule = SimultaneousActivation(self)
         self.running = True #Para la visualizacion usando navegador
         
-        for (content, x, y) in self.grid.coord_iter():
+        for content, (x, y) in self.grid.coord_iter():
             a = GameLifeAgent((x, y), self)
             self.grid.place_agent(a, (x, y))
             self.schedule.add(a)
