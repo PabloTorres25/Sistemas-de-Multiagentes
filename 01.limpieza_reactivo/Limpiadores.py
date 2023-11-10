@@ -1,9 +1,9 @@
 from mesa import Agent, Model 
 from mesa.space import SingleGrid
 from mesa.time import SimultaneousActivation
-import numpy as np
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
+import numpy as np
 
 def celdas_random(anchura, altura, porcentaje):
     total_celdas = int((porcentaje / 100) * altura * anchura)
@@ -19,6 +19,11 @@ def celdas_random(anchura, altura, porcentaje):
     return coordenadas_celdas
 
 class Basura(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.next_state = None
+
+class Inicio(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
@@ -70,14 +75,17 @@ class LimpiadoresModel(Model):
             self.grid.place_agent(basura, (x, y))        # Ahora lo colocamos
             self.schedule.add(basura) 
         
-        
+        # primer_limpiador = Limpiador(self.num_serie, self, movable=False)
+        # self.grid.place_agent(primer_limpiador, (1, 1))
+        # self.schedule.add(primer_limpiador)
+        # self.num_serie +=1
 
-        limpiador = Limpiador(self.num_serie, self)
-        self.grid.place_agent(limpiador, (1, 1))
-        self.schedule.add(limpiador)
-        self.num_serie +=1
+        # inicio = Inicio(self.num_serie, self)
+        # self.grid.place_agent(inicio, (1, 1))
+        # self.schedule.add(inicio)
 
     def step(self):
+
         # Creación de Limpiadores
         if self.grid.is_cell_empty((1, 1)) and self.num_serie < self.num_agents:
             # Crear un nuevo Limpiador
@@ -94,7 +102,7 @@ class LimpiadoresModel(Model):
 if __name__ == "__main__":
     
     def agent_portrayal(agent):
-        if isinstance(agent, Limpiador):
+        if isinstance(agent, Limpiador) or isinstance(agent, Inicio):
             portrayal = {"Shape": "circle",
                         "Filled": "true",
                         "Layer": 0,
