@@ -2,8 +2,6 @@ from mesa import Agent, Model
 from mesa.space import SingleGrid
 from mesa.time import SimultaneousActivation
 import numpy as np
-from mesa.visualization.modules import CanvasGrid
-from mesa.visualization.ModularVisualization import ModularServer
 
 def celdas_random(anchura, altura, porcentaje):
     total_celdas = int((porcentaje / 100) * altura * anchura)
@@ -48,33 +46,6 @@ class LimpiadoresModel(Model):
         #     self.grid.place_agent(limpiador, (1, 1))
         #     self.schedule.add(limpiador) 
         #     num_serie +=1
-        
-        # Configuración de la visualización
-        agent_portrayal = {
-            'Limpiador': {'Shape': 'circle', 'Color': 'blue'},
-            'Basura': {'Shape': 'rect', 'Color': 'red'}
-        }
-
-        self.grid_view = CanvasGrid(lambda x: agent_portrayal[x.__class__.__name__], width, height, 750, 750)
-
-        # Configuración del servidor de visualización
-        self.server = ModularServer(LimpiadoresModel, [self.grid_view], 'Modelo Limpiadores',
-                                    {"width": width, "height": height, "num_agents": num_agents, "por_basura": por_basura, "tiempo": tiempo})
-        self.server.port = 8521  # Puedes cambiar el puerto según tus necesidades
-        self.server.launch()
-
     
     def step(self):
         self.schedule.step()
-
-if __name__ == "__main__":
-    ancho = 10
-    alto = 10
-    por_basura = 20
-    num_agents = 3
-    tiempo = 100
-    modelo = LimpiadoresModel(ancho, alto, num_agents, por_basura, tiempo)
-
-    # # Ejecución del modelo
-    # for i in range(tiempo):
-    #     modelo.step()
