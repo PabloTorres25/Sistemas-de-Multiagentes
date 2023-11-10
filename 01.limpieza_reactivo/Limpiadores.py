@@ -70,14 +70,10 @@ class LimpiadoresModel(Model):
             self.grid.place_agent(basura, (x, y))        # Ahora lo colocamos
             self.schedule.add(basura) 
         
-        # primer_limpiador = Limpiador(self.num_serie, self, movable=False)
-        # self.grid.place_agent(primer_limpiador, (1, 1))
-        # self.schedule.add(primer_limpiador)
-        # self.num_serie +=1
-
-        # inicio = Inicio(self.num_serie, self)
-        # self.grid.place_agent(inicio, (1, 1))
-        # self.schedule.add(inicio)
+        primer_limpiador = Limpiador(self.num_serie, self)
+        self.grid.place_agent(primer_limpiador, (1, 1))
+        self.schedule.add(primer_limpiador)
+        self.num_serie +=1
 
     def step(self):
         # Hacer avanzar el modelo
