@@ -5,6 +5,7 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 import numpy as np
 import time
+from datetime import datetime
 
 def celdas_random(anchura, altura, porcentaje):
     total_celdas = int((porcentaje / 100) * altura * anchura)
@@ -62,8 +63,8 @@ class LimpiadoresModel(Model):
         self.running = True # Para la visualizacion usando navegador
         self.num_agents = num_agents
         self.num_serie = 0
-        self.tiempo_inicial = time.time()
-        self.tiempo_maximo = tiempo 
+        self.tiempo_maximo_segundos = tiempo
+        self.tiempo_inicio = datetime.now()
         self.porcentaje_inicial = por_basura
         
 
@@ -80,25 +81,32 @@ class LimpiadoresModel(Model):
         self.num_serie +=1
 
     def step(self):
+        tiempo_actual = datetime.now() - self.tiempo_inicio
+        print(f"Tiempo transcurrido: {tiempo_actual}")
+        if tiempo_actual.total_seconds() >= self.tiempo_maximo_segundos:
+            self.running = False  # Detener la simulación
+            print("Tiempo Maximo alcanzado")
+            return
+
         # Hacer avanzar el modelo
         self.schedule.step()
 
-        # Obtener el tiempo transcurrido
-        tiempo_actual = time.time()
-        tiempo_transcurrido = tiempo_actual - self.tiempo_inicial
-        print(f"Tiempo transcurrido: {tiempo_transcurrido}")
+        # # Obtener el tiempo transcurrido
+        # tiempo_actual = time.time()
+        # tiempo_transcurrido = tiempo_actual - self.tiempo_inicial
+        # print(f"Tiempo transcurrido: {tiempo_transcurrido}")
 
-        if tiempo_transcurrido >= self.tiempo_maximo:
-            celdas_sucias_actuales = sum(isinstance(agent, Basura) 
-                                        for contents in self.grid.contents.values()
-                                        for agent in contents)
-            print("Celdas sucias actuales = ", celdas_sucias_actuales)
-            porcentaje_actual = (celdas_sucias_actuales / (self.grid.width * self.grid.height)) * 100
+        # if tiempo_transcurrido >= self.tiempo_maximo:
+        #     celdas_sucias_actuales = sum(isinstance(agent, Basura) 
+        #                                 for contents in self.grid.contents.values()
+        #                                 for agent in contents)
+        #     print("Celdas sucias actuales = ", celdas_sucias_actuales)
+        #     porcentaje_actual = (celdas_sucias_actuales / (self.grid.width * self.grid.height)) * 100
 
-            print(f"Porcentaje inicial de celdas sucias: {self.porcentaje_inicial}%")
-            print(f"Porcentaje actual de celdas sucias: {porcentaje_actual}%")
-            print("Tiempo Maximo alcanzado")
-            self.running = False
+        #     print(f"Porcentaje inicial de celdas sucias: {self.porcentaje_inicial}%")
+        #     print(f"Porcentaje actual de celdas sucias: {porcentaje_actual}%")
+        #     
+        #     self.running = False
 
         # Creación de Limpiadores
         if self.grid.is_cell_empty((1, 1)) and self.num_serie < self.num_agents:
