@@ -4,6 +4,7 @@ from mesa.time import SimultaneousActivation
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 import numpy as np
+import time
 
 def celdas_random(anchura, altura, porcentaje):
     total_celdas = int((porcentaje / 100) * altura * anchura)
@@ -61,6 +62,9 @@ class LimpiadoresModel(Model):
         self.running = True # Para la visualizacion usando navegador
         self.num_agents = num_agents
         self.num_serie = 0
+        self.tiempo_inicial = time.time()
+        self.tiempo_maximo = tiempo 
+        self.porcentaje_inicial = por_basura
         
 
         # Creación de Basura
@@ -79,6 +83,23 @@ class LimpiadoresModel(Model):
         # Hacer avanzar el modelo
         self.schedule.step()
 
+        # Obtener el tiempo transcurrido
+        tiempo_actual = time.time()
+        tiempo_transcurrido = tiempo_actual - self.tiempo_inicial
+        print(f"Tiempo transcurrido: {tiempo_transcurrido}")
+
+        if tiempo_transcurrido >= self.tiempo_maximo:
+            celdas_sucias_actuales = sum(isinstance(agent, Basura) 
+                                        for contents in self.grid.contents.values()
+                                        for agent in contents)
+            print("Celdas sucias actuales = ", celdas_sucias_actuales)
+            porcentaje_actual = (celdas_sucias_actuales / (self.grid.width * self.grid.height)) * 100
+
+            print(f"Porcentaje inicial de celdas sucias: {self.porcentaje_inicial}%")
+            print(f"Porcentaje actual de celdas sucias: {porcentaje_actual}%")
+            print("Tiempo Maximo alcanzado")
+            self.running = False
+
         # Creación de Limpiadores
         if self.grid.is_cell_empty((1, 1)) and self.num_serie < self.num_agents:
             # Crear un nuevo Limpiador
@@ -86,9 +107,7 @@ class LimpiadoresModel(Model):
             self.grid.place_agent(new_limpiador, (1, 1))
             self.schedule.add(new_limpiador)
             self.num_serie +=1
-
         
-
 
 if __name__ == "__main__":
     
@@ -111,7 +130,7 @@ if __name__ == "__main__":
     alto = 10
     numero_Agentes = 3
     porcentaje_basura = 30
-    tiempo = 100
+    tiempo = 2
     grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
     server = ModularServer(LimpiadoresModel,
                         [grid],
