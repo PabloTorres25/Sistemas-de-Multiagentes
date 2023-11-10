@@ -51,6 +51,8 @@ class Limpiador(Agent):
                     # Aspira = Elimina la basura
                     basura_agent = basura_agents[0]  # Suponemos que solo hay una basura en la celda
                     self.model.grid.remove_agent(basura_agent)
+                    self.model.basura_inicial -= 1
+                    print("Basuras restantes =", self.model.basura_inicial)
                     
                     # Mueve al Limpiador a la nueva posición
                     self.model.grid.move_agent(self, (new_x, new_y))
@@ -63,9 +65,12 @@ class LimpiadoresModel(Model):
         self.running = True # Para la visualizacion usando navegador
         self.num_agents = num_agents
         self.num_serie = 0
+        self.width = width
+        self.height = height
         self.tiempo_maximo_segundos = tiempo
         self.tiempo_inicio = datetime.now()
-        self.porcentaje_inicial = por_basura
+        self.basura_inicial = int((por_basura / 100) * height * width)
+        print("Basura inicial = ", self.basura_inicial)
         
 
         # Creación de Basura
@@ -86,6 +91,9 @@ class LimpiadoresModel(Model):
         if tiempo_actual.total_seconds() >= self.tiempo_maximo_segundos:
             self.running = False  # Detener la simulación
             print("Tiempo Maximo alcanzado")
+            porcentaje = (self.basura_inicial / (self.height * self.width)) * 100
+            print("Basura restante = ", self.basura_inicial)
+            print("Porcentaje de basura restante = ", porcentaje, "%")
             return
 
         # Hacer avanzar el modelo
@@ -117,11 +125,11 @@ if __name__ == "__main__":
                         "r": 0.25}
         return portrayal
 
-    ancho = 10
-    alto = 10
-    numero_Agentes = 3
+    ancho = 5
+    alto = 5
+    numero_Agentes = 6
     porcentaje_basura = 30
-    tiempo = 2
+    tiempo = 10
     grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
     server = ModularServer(LimpiadoresModel,
                         [grid],
