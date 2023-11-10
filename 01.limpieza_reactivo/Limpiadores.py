@@ -95,6 +95,12 @@ class LimpiadoresModel(Model):
             print("Basura restante = ", self.basura_inicial)
             print("Porcentaje de basura restante = ", porcentaje, "%")
             return
+        
+        if self.basura_inicial <= 0:
+            self.running = False  # Detener la simulación
+            print("SE ASPIRARON TODAS LAS BASURAS")
+            print(f"En un tiempo de: {tiempo_actual}")
+            return
 
         # Hacer avanzar el modelo
         self.schedule.step()
