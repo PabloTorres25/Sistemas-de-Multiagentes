@@ -29,20 +29,13 @@ class Limpiador(Agent):
         self.next_state = None
     
     def step(self):
-        x, y = self.pos
-        possible_moves = [(x + dx, y + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1] if (dx, dy) != (0, 0)]
-        # Elige un nuevo paso
-        new_x, new_y = self.random.choice(possible_moves)
-        
-        # Revisa si no se sale de la cuadricula y si está vacía
-        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height and not self.model.grid.is_cell_occupied((new_x, new_y)):
-            self.model.grid.move_agent(self, (new_x, new_y))
+        self.model.grid.move_to_empty(self) # Gracias Documentación :)
 
 class LimpiadoresModel(Model):
     def __init__(self, width, height, num_agents, por_basura, tiempo):
         self.grid = SingleGrid(width, height, True)
         self.schedule = SimultaneousActivation(self)
-        self.running = True #Para la visualizacion usando navegador
+        self.running = True # Para la visualizacion usando navegador
 
         # Creación de Basura
         coor_basura = celdas_random(width, height, por_basura)
