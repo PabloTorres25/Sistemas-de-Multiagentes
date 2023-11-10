@@ -30,7 +30,7 @@ class Limpiador(Agent):
     
     def step(self):
         x, y = self.pos
-        possible_moves = [(x + dx, y + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1] if (dx, dy) != (0, 0)]
+        possible_moves = [(x + dx, y + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1]]
         
         # De todas las posibilidades elige una
         new_x, new_y = self.random.choice(possible_moves)
@@ -74,21 +74,17 @@ class LimpiadoresModel(Model):
 
         limpiador = Limpiador(self.num_serie, self)
         self.grid.place_agent(limpiador, (1, 1))
-        self.schedule.add(limpiador) 
+        self.schedule.add(limpiador)
+        self.num_serie +=1
 
     def step(self):
         # Creación de Limpiadores
-        # if self.model.grid.is_cell_empty((1, 1)) and num_serie < num_agents:
-        #         num_serie +=1
-        #         nuevo_limpiador = Limpiador(num_serie, self)
-        #         self.grid.place_agent(nuevo_limpiador, (1, 1))
-        #         self.schedule.add(nuevo_limpiador) 
-        if self.num_serie < self.num_agents:
+        if self.grid.is_cell_empty((1, 1)) and self.num_serie < self.num_agents:
             # Crear un nuevo Limpiador
-            self.num_serie +=1
             new_limpiador = Limpiador(self.num_serie, self)
-            self.grid.place_agent(new_limpiador, (9, 0))
+            self.grid.place_agent(new_limpiador, (1, 1))
             self.schedule.add(new_limpiador)
+            self.num_serie +=1
 
         # Hacer avanzar el modelo
         self.schedule.step()
