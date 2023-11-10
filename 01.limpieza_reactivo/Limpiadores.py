@@ -34,8 +34,8 @@ class Limpiador(Agent):
         # Elige un nuevo paso
         new_x, new_y = self.random.choice(possible_moves)
         
-        # Revisa si la nueva posición está dentro de la cuadrícula
-        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+        # Revisa si no se sale de la cuadricula y si está vacía
+        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height and not self.model.grid.is_cell_occupied((new_x, new_y)):
             self.model.grid.move_agent(self, (new_x, new_y))
 
 class LimpiadoresModel(Model):
