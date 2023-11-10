@@ -2,6 +2,8 @@ from mesa import Agent, Model
 from mesa.space import SingleGrid
 from mesa.time import SimultaneousActivation
 import numpy as np
+from mesa.visualization.modules import CanvasGrid
+from mesa.visualization.ModularVisualization import ModularServer
 
 def celdas_random(anchura, altura, porcentaje):
     total_celdas = int((porcentaje / 100) * altura * anchura)
@@ -10,7 +12,7 @@ def celdas_random(anchura, altura, porcentaje):
     for _ in range(total_celdas):
         while True:
             coordenada = (np.random.randint(0, altura), np.random.randint(0, anchura))
-            if coordenada not in coordenadas_celdas:
+            if coordenada not in coordenadas_celdas and coordenada != (1, 1):
                 coordenadas_celdas.append(coordenada)
                 break
 
@@ -25,6 +27,13 @@ class Limpiador(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
+    
+    def step(self):
+        x, y = self.pos
+        new_x = x + 1
+        # Revisa si new_x siguene en la cuadricula
+        if new_x < self.model.grid.width:
+            self.model.grid.move_agent(self, (new_x, y))
 
 class LimpiadoresModel(Model):
     def __init__(self, width, height, num_agents, por_basura, tiempo):
@@ -39,13 +48,49 @@ class LimpiadoresModel(Model):
             self.grid.place_agent(basura, (x, y))        # Ahora lo colocamos
             self.schedule.add(basura) 
         
-        # # Creación de agentes
+        # Creación de agentes
         # num_serie = 0
         # for i in range (num_agents):
         #     limpiador = Limpiador(num_serie, self)
         #     self.grid.place_agent(limpiador, (1, 1))
         #     self.schedule.add(limpiador) 
         #     num_serie +=1
-    
+        limpiador = Limpiador(0, self)
+        self.grid.place_agent(limpiador, (1, 1))
+        self.schedule.add(limpiador) 
+
+
     def step(self):
         self.schedule.step()
+
+if __name__ == "__main__":
+    
+    def agent_portrayal(agent):
+        if isinstance(agent, Limpiador):
+            portrayal = {"Shape": "circle",
+                        "Filled": "true",
+                        "Layer": 0,
+                        "Color": "red",
+                        "r": 0.5}
+        else:
+            portrayal = {"Shape": "circle",
+                        "Filled": "true",
+                        "Layer": 0,
+                        "Color": "blue",
+                        "r": 0.25}
+        return portrayal
+
+    ancho = 10
+    alto = 10
+    numero_Agentes = 3
+    porcentaje_basura = 20
+    tiempo = 100
+    grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
+    server = ModularServer(LimpiadoresModel,
+                        [grid],
+                        "Robots Limpiadores Model",
+                        {"width":ancho, "height":alto, 
+                        "num_agents" : numero_Agentes, "por_basura" : porcentaje_basura, 
+                        "tiempo" : tiempo})
+    server.port = 8521 # The default
+    server.launch()
