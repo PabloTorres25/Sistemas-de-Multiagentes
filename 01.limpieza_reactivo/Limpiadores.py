@@ -133,9 +133,9 @@ if __name__ == "__main__":
 
     ancho = 5
     alto = 5
-    numero_Agentes = 6
+    numero_Agentes = 8
     porcentaje_basura = 30
-    tiempo = 10
+    tiempo = 30
     grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
     server = ModularServer(LimpiadoresModel,
                         [grid],
