@@ -34,6 +34,7 @@ class Limpiador(Agent):
         
         new_x, new_y = self.random.choice(possible_moves)
         if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+            # is_cell_empty y move_agent, provienen de la documentación de Mesa.SingleGrid
             if self.model.grid.is_cell_empty((new_x, new_y)):
                 self.model.grid.move_agent(self, (new_x, new_y))
 
