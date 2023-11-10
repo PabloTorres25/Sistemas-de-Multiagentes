@@ -30,10 +30,13 @@ class Limpiador(Agent):
     
     def step(self):
         x, y = self.pos
-        new_x = x + 1
-        # Revisa si new_x siguene en la cuadricula
-        if new_x < self.model.grid.width:
-            self.model.grid.move_agent(self, (new_x, y))
+        possible_moves = [(x + dx, y + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1] if (dx, dy) != (0, 0)]
+        # Elige un nuevo paso
+        new_x, new_y = self.random.choice(possible_moves)
+        
+        # Revisa si la nueva posición está dentro de la cuadrícula
+        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+            self.model.grid.move_agent(self, (new_x, new_y))
 
 class LimpiadoresModel(Model):
     def __init__(self, width, height, num_agents, por_basura, tiempo):
