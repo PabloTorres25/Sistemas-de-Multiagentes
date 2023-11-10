@@ -83,7 +83,7 @@ class LimpiadoresModel(Model):
         primer_limpiador = Limpiador(self.num_serie, self)
         self.grid.place_agent(primer_limpiador, (1, 1))
         self.schedule.add(primer_limpiador)
-        self.num_serie +=1
+        self.num_serie += 1
 
     def step(self):
         tiempo_actual = datetime.now() - self.tiempo_inicio
@@ -111,7 +111,7 @@ class LimpiadoresModel(Model):
             new_limpiador = Limpiador(self.num_serie, self)
             self.grid.place_agent(new_limpiador, (1, 1))
             self.schedule.add(new_limpiador)
-            self.num_serie +=1
+            self.num_serie += 1
         
 
 if __name__ == "__main__":
