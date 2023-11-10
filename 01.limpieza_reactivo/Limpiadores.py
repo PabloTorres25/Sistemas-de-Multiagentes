@@ -23,11 +23,6 @@ class Basura(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
 
-class Inicio(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.next_state = None
-
 class Limpiador(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
@@ -85,6 +80,8 @@ class LimpiadoresModel(Model):
         # self.schedule.add(inicio)
 
     def step(self):
+        # Hacer avanzar el modelo
+        self.schedule.step()
 
         # Creación de Limpiadores
         if self.grid.is_cell_empty((1, 1)) and self.num_serie < self.num_agents:
@@ -94,15 +91,13 @@ class LimpiadoresModel(Model):
             self.schedule.add(new_limpiador)
             self.num_serie +=1
 
-        # Hacer avanzar el modelo
-        self.schedule.step()
         
 
 
 if __name__ == "__main__":
     
     def agent_portrayal(agent):
-        if isinstance(agent, Limpiador) or isinstance(agent, Inicio):
+        if isinstance(agent, Limpiador):
             portrayal = {"Shape": "circle",
                         "Filled": "true",
                         "Layer": 0,
