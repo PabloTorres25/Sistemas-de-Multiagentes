@@ -37,10 +37,21 @@ class Limpiador(Agent):
         # Si la elección no se sale del margen
         if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
             # Y si la elección es una calda vacia
-            # is_cell_empty y move_agent, provienen de la documentación de Mesa.SingleGrid
             if self.model.grid.is_cell_empty((new_x, new_y)):
                 # Muevete a la elección, sino no hagas nada
                 self.model.grid.move_agent(self, (new_x, new_y))
+            # O si es de basura, Aspira
+            else: 
+                cell_contents = self.model.grid.get_cell_list_contents([(new_x, new_y)])
+                basura_agents = [agent for agent in cell_contents if isinstance(agent, Basura)]
+
+                if basura_agents:
+                    # Aspira = Elimina la basura
+                    basura_agent = basura_agents[0]  # Suponemos que solo hay una basura en la celda
+                    self.model.grid.remove_agent(basura_agent)
+                    
+                    # Mueve al Limpiador a la nueva posición
+                    self.model.grid.move_agent(self, (new_x, new_y))
 
 
 class LimpiadoresModel(Model):
@@ -48,6 +59,9 @@ class LimpiadoresModel(Model):
         self.grid = SingleGrid(width, height, True)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
+        self.num_agents = num_agents
+        self.num_serie = 0
+        
 
         # Creación de Basura
         coor_basura = celdas_random(width, height, por_basura)
@@ -56,20 +70,30 @@ class LimpiadoresModel(Model):
             self.grid.place_agent(basura, (x, y))        # Ahora lo colocamos
             self.schedule.add(basura) 
         
-        # Creación de agentes
-        # num_serie = 0
-        # for i in range (num_agents):
-        #     limpiador = Limpiador(num_serie, self)
-        #     self.grid.place_agent(limpiador, (1, 1))
-        #     self.schedule.add(limpiador) 
-        #     num_serie +=1
-        limpiador = Limpiador(0, self)
+        
+
+        limpiador = Limpiador(self.num_serie, self)
         self.grid.place_agent(limpiador, (1, 1))
         self.schedule.add(limpiador) 
 
-
     def step(self):
+        # Creación de Limpiadores
+        # if self.model.grid.is_cell_empty((1, 1)) and num_serie < num_agents:
+        #         num_serie +=1
+        #         nuevo_limpiador = Limpiador(num_serie, self)
+        #         self.grid.place_agent(nuevo_limpiador, (1, 1))
+        #         self.schedule.add(nuevo_limpiador) 
+        if self.num_serie < self.num_agents:
+            # Crear un nuevo Limpiador
+            self.num_serie +=1
+            new_limpiador = Limpiador(self.num_serie, self)
+            self.grid.place_agent(new_limpiador, (9, 0))
+            self.schedule.add(new_limpiador)
+
+        # Hacer avanzar el modelo
         self.schedule.step()
+        
+
 
 if __name__ == "__main__":
     
@@ -91,7 +115,7 @@ if __name__ == "__main__":
     ancho = 10
     alto = 10
     numero_Agentes = 3
-    porcentaje_basura = 20
+    porcentaje_basura = 30
     tiempo = 100
     grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
     server = ModularServer(LimpiadoresModel,
