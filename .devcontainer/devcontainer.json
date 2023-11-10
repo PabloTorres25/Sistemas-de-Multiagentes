@@ -1,0 +1,8 @@
+{
+    "name": "Gitpod Example",
+    "extensions": [
+      "ms-python.python"
+    ],
+    "postCreateCommand": "pip install -r /workspace/Sistemas-de-Multiagentes/requirements.txt"
+  }
+  
