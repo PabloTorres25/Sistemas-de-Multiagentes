@@ -32,10 +32,14 @@ class Limpiador(Agent):
         x, y = self.pos
         possible_moves = [(x + dx, y + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1] if (dx, dy) != (0, 0)]
         
+        # De todas las posibilidades elige una
         new_x, new_y = self.random.choice(possible_moves)
+        # Si la elección no se sale del margen
         if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+            # Y si la elección es una calda vacia
             # is_cell_empty y move_agent, provienen de la documentación de Mesa.SingleGrid
             if self.model.grid.is_cell_empty((new_x, new_y)):
+                # Muevete a la elección, sino no hagas nada
                 self.model.grid.move_agent(self, (new_x, new_y))
 
 
