@@ -29,7 +29,14 @@ class Limpiador(Agent):
         self.next_state = None
     
     def step(self):
-        self.model.grid.move_to_empty(self) # Gracias Documentación :)
+        x, y = self.pos
+        possible_moves = [(x + dx, y + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1] if (dx, dy) != (0, 0)]
+        
+        new_x, new_y = self.random.choice(possible_moves)
+        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+            if self.model.grid.is_cell_empty((new_x, new_y)):
+                self.model.grid.move_agent(self, (new_x, new_y))
+
 
 class LimpiadoresModel(Model):
     def __init__(self, width, height, num_agents, por_basura, tiempo):
