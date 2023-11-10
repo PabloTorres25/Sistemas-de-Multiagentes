@@ -91,23 +91,6 @@ class LimpiadoresModel(Model):
         # Hacer avanzar el modelo
         self.schedule.step()
 
-        # # Obtener el tiempo transcurrido
-        # tiempo_actual = time.time()
-        # tiempo_transcurrido = tiempo_actual - self.tiempo_inicial
-        # print(f"Tiempo transcurrido: {tiempo_transcurrido}")
-
-        # if tiempo_transcurrido >= self.tiempo_maximo:
-        #     celdas_sucias_actuales = sum(isinstance(agent, Basura) 
-        #                                 for contents in self.grid.contents.values()
-        #                                 for agent in contents)
-        #     print("Celdas sucias actuales = ", celdas_sucias_actuales)
-        #     porcentaje_actual = (celdas_sucias_actuales / (self.grid.width * self.grid.height)) * 100
-
-        #     print(f"Porcentaje inicial de celdas sucias: {self.porcentaje_inicial}%")
-        #     print(f"Porcentaje actual de celdas sucias: {porcentaje_actual}%")
-        #     
-        #     self.running = False
-
         # Creación de Limpiadores
         if self.grid.is_cell_empty((1, 1)) and self.num_serie < self.num_agents:
             # Crear un nuevo Limpiador
