@@ -34,7 +34,7 @@ class CiudadModel(Model):
         self.num_autos = num_autos
 
         new_auto = Auto(0, self)
-        self.grid.place_agent(new_auto, (1, 1))
+        self.grid.place_agent(new_auto, (23, 23))
         self.schedule.add(new_auto)
 
     def step(self):
@@ -58,10 +58,10 @@ if __name__ == "__main__":
                         "r": 0.25}
         return portrayal
 
-    ancho = 20
-    alto = 20
+    ancho = 24
+    alto = 24
     numero_coches = 10
-    grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
+    grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
     server = ModularServer(CiudadModel,
                         [grid],
                         "Ciudad Model",
