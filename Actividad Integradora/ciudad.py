@@ -31,15 +31,7 @@ class CiudadModel(Model):
         self.grid = SingleGrid(24, 24, True)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
-        self.num_agents = num_agents
-        self.num_serie = 0
-        self.width = width
-        self.height = height
-        self.tiempo_maximo_segundos = tiempo
-        self.tiempo_inicio = datetime.now()
-        self.basura_inicial = int((por_basura / 100) * height * width)
-        print("Basura inicial = ", self.basura_inicial)
-        
+        self.num_autos = num_autos
 
         # Creación de Basura
         coor_basura = celdas_random(width, height, por_basura)
@@ -99,17 +91,11 @@ if __name__ == "__main__":
                         "r": 0.25}
         return portrayal
 
-    ancho = 5
-    alto = 5
-    numero_Agentes = 8
-    porcentaje_basura = 30
-    tiempo = 30
+    numero_coches = 10
     grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
     server = ModularServer(LimpiadoresModel,
                         [grid],
-                        "Robots Limpiadores Model",
-                        {"width":ancho, "height":alto, 
-                        "num_agents" : numero_Agentes, "por_basura" : porcentaje_basura, 
-                        "tiempo" : tiempo})
+                        "Ciudad Model",
+                        {"numero_autos":numero_coches})
     server.port = 8521 # The default
     server.launch()
