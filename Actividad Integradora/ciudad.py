@@ -34,33 +34,28 @@ class CiudadModel(Model):
         self.num_autos = num_autos
 
         new_auto = Auto(0, self)
-        self.grid.place_agent(new_auto, (23, 23))
+        self.grid.place_agent(new_auto, (5, 5))  # Agente en la posición (5, 5)
         self.schedule.add(new_auto)
 
     def step(self):
         # Hacer avanzar el modelo
         self.schedule.step()
 
-if __name__ == "__main__":
-    
-    def agent_portrayal(agent):
-        if isinstance(agent, Auto):
-            portrayal = {"Shape": "circle",
-                        "Filled": "true",
-                        "Layer": 0,
-                        "Color": "red",
-                        "r": 0.5}
-        else:
-            portrayal = {"Shape": "circle",
-                        "Filled": "true",
-                        "Layer": 0,
-                        "Color": "blue",
-                        "r": 0.25}
-        return portrayal
+def agent_portrayal(agent):
+    portrayal = {
+        "Shape": "rect",
+        "Filled": "true",
+        "Layer": 0,
+        "Color": "blue",  # Fondo azul para todas las celdas
+        "w": 1,
+        "h": 1
+    }
+    return portrayal
 
+if __name__ == "__main__":
     ancho = 24
     alto = 24
-    numero_coches = 10
+    numero_coches = 1
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
     server = ModularServer(CiudadModel,
                         [grid],
