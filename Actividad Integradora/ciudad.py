@@ -1,5 +1,5 @@
 from mesa import Agent, Model 
-from mesa.space import SingleGrid
+from mesa.space import MultiGrid
 from mesa.time import SimultaneousActivation
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
@@ -28,7 +28,7 @@ class Semaforo(Agent):
 
 class CiudadModel(Model):
     def __init__(self, width, height,num_autos):
-        self.grid = SingleGrid(width, height, True)
+        self.grid = MultiGrid(width, height, False)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
         self.num_autos = num_autos
@@ -47,8 +47,8 @@ def agent_portrayal(agent):
         "Filled": "true",
         "Layer": 0,
         "Color": "blue",  # Fondo azul para todas las celdas
-        "w": 1,
-        "h": 1
+        "w": 2,
+        "h": 2
     }
     return portrayal
 
