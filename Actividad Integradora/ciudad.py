@@ -27,14 +27,14 @@ class Semaforo(Agent):
 
 
 class CiudadModel(Model):
-    def __init__(self, num_autos):
-        self.grid = SingleGrid(23, 23, True)
+    def __init__(self, width, height,num_autos):
+        self.grid = SingleGrid(width, height, True)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
         self.num_autos = num_autos
 
         new_auto = Auto(0, self)
-        self.grid.place_agent(new_auto, (22, 22))
+        self.grid.place_agent(new_auto, (1, 1))
         self.schedule.add(new_auto)
 
     def step(self):
@@ -58,13 +58,13 @@ if __name__ == "__main__":
                         "r": 0.25}
         return portrayal
 
-    ancho = 24
-    alto = 24
+    ancho = 20
+    alto = 20
     numero_coches = 10
     grid = CanvasGrid(agent_portrayal, ancho, alto, 500, 500)
     server = ModularServer(CiudadModel,
                         [grid],
                         "Ciudad Model",
-                        {"num_autos":numero_coches})
+                        {"width": ancho, "height": alto, "num_autos":numero_coches})
     server.port = 8521 # The default
     server.launch()
