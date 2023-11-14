@@ -4,63 +4,31 @@ from mesa.time import SimultaneousActivation
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 import numpy as np
-import time
-from datetime import datetime
 
-def celdas_random(anchura, altura, porcentaje):
-    total_celdas = int((porcentaje / 100) * altura * anchura)
-    coordenadas_celdas = []
-
-    for _ in range(total_celdas):
-        while True:
-            coordenada = (np.random.randint(0, altura), np.random.randint(0, anchura))
-            if coordenada not in coordenadas_celdas and coordenada != (1, 1):
-                coordenadas_celdas.append(coordenada)
-                break
-
-    return coordenadas_celdas
-
-class Basura(Agent):
+class Auto(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
 
-class Limpiador(Agent):
+class Edificio(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
-    
-    def step(self):
-        x, y = self.pos
-        possible_moves = [(x + dx, y + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1]]
-        
-        # De todas las posibilidades elige una
-        new_x, new_y = self.random.choice(possible_moves)
-        # Si la elección no se sale del margen
-        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
-            # Y si la elección es una calda vacia
-            if self.model.grid.is_cell_empty((new_x, new_y)):
-                # Muevete a la elección, sino no hagas nada
-                self.model.grid.move_agent(self, (new_x, new_y))
-            # O si es de basura, Aspira
-            else: 
-                cell_contents = self.model.grid.get_cell_list_contents([(new_x, new_y)])
-                basura_agents = [agent for agent in cell_contents if isinstance(agent, Basura)]
 
-                if basura_agents:
-                    # Aspira = Elimina la basura
-                    basura_agent = basura_agents[0]  # Suponemos que solo hay una basura en la celda
-                    self.model.grid.remove_agent(basura_agent)
-                    self.model.basura_inicial -= 1
-                    print("Basuras restantes =", self.model.basura_inicial)
-                    
-                    # Mueve al Limpiador a la nueva posición
-                    self.model.grid.move_agent(self, (new_x, new_y))
+class Estacionamiento(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.next_state = None
+
+class Semaforo(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.next_state = None
 
 
-class LimpiadoresModel(Model):
-    def __init__(self, width, height, num_agents, por_basura, tiempo):
-        self.grid = SingleGrid(width, height, True)
+class CiudadModel(Model):
+    def __init__(self, num_autos):
+        self.grid = SingleGrid(24, 24, True)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
         self.num_agents = num_agents
