@@ -44,7 +44,19 @@ class CiudadModel(Model):
         # Construccion del Mapa
 
         ## Edificios
+        for edificio in list_edif:
+            rango_x = edificio[1][0] - edificio[0][0] + 1
+            rango_y = edificio[1][1] - edificio[0][1] + 1
+            for i in range(rango_x):
+                for j in range(rango_y):
+                    new_edificio = Edificio(id_agente, self)
+                    X = (edificio[0][0] + i) - 1
+                    Y = height - (edificio[0][1] + j)
+                    self.grid.place_agent(new_edificio, (X,Y))
+                    self.schedule.add(new_edificio)
+                    id_agente += 1
         
+        ## Glorietas
         for edificio in list_edif:
             rango_x = edificio[1][0] - edificio[0][0] + 1
             rango_y = edificio[1][1] - edificio[0][1] + 1
@@ -147,6 +159,10 @@ if __name__ == "__main__":
         (3,18), (18,18), (20,18), (6,21), (9,21), (20,21)
     )
 
+    lista_glorietas: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
+        ((14,13),(15,15))
+    )
+
     # Autos
     numero_autos = 1
 
@@ -157,6 +173,7 @@ if __name__ == "__main__":
                         {"width": ancho, "height": alto, 
                         "num_autos": numero_autos,
                         "list_edif": lista_edificios,
-                        "list_esta": lista_estacionamientos})
+                        "list_esta": lista_estacionamientos,
+                        "list_glorietas": lista_glorietas})
     server.port = 8521 # The default
     server.launch()
