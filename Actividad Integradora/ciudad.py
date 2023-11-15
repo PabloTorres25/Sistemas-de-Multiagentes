@@ -32,12 +32,12 @@ class Auto(Agent):
 
         if pos_list == self.destino:
             if (self.destino_bool == False):
-                print("LLEGUE A MI DESTINO!!!, ID = ", self.unique_id)
-                self.destino_bool == True
+                print("LLEGUE A MI DESTINO!!!, Auto ID = ", self.unique_id)
+                self.destino_bool = True
         else:
             # Primero, vemos si esta en un estacionamiento que no sea el de destino
-            cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
-            estacion_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
+            cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
+            estacion_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
             if estacion_agents and pos_list != self.destino:
                 for move in possible_moves:
                     if self.model.grid.is_cell_empty(move):
@@ -242,6 +242,13 @@ if __name__ == "__main__":
         ((6,9), "H"), ((1,12), "H"), ((3,13), "V"),
         ((22,15), "V"), ((23,17), "H"), 
         ((15,21), "H"), ((13,22), "H"), ((12,23), "V")
+    )
+    # Aqui te quecaste
+    # Tu idea, es definir las direcciones de todas las calles, para que cuando los autos esten ahi vayan en esas direcciones
+    # Pero te quedaste, en que tenias problemas, cuando por ejemplo dos calles chochan (1,1 - 2,2)
+    lista_direcciones = (
+        (((1,1),(24,2)),"D"),
+        (((1,3),(24,2)),"D")
     )
 
     # Autos
