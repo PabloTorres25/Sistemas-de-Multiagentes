@@ -11,6 +11,14 @@ class Auto(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
+    
+    def step(self):
+        x, y = self.pos
+        new_x = x
+        new_y = y + 1
+
+        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+            self.model.grid.move_agent(self, (new_x, new_y))
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -38,14 +46,13 @@ class Semaforo(Agent):
         else:
             self.color = "#FF0200"
 
-    # def step(self):
-    #     self.steps += 1
-
-    #     if self.steps % 5 == 0:
-    #         if self.color == "00B050":
-    #             self.color = "FF0200"
-    #         else:
-    #             self.color = "00B050"
+    def step(self):
+        self.steps += 1
+        if self.steps % 10 == 0:
+            if self.color == "#00B050":
+                self.color = "#FF0200"
+            else:
+                self.color = "#00B050"
 
 
 class CiudadModel(Model):
@@ -101,11 +108,12 @@ class CiudadModel(Model):
             self.grid.place_agent(new_estacionamiento, (X,Y))
             self.schedule.add(new_estacionamiento)
             id_agente += 1
-
-        # new_auto = Auto(0, self)
-        # self.grid.place_agent(new_auto, (5, 5))  # Agente en la posición (5, 5)
-        # self.schedule.add(new_auto)
-
+        
+        # Auto
+        new_auto = Auto(id_agente, self)
+        self.grid.place_agent(new_auto, (10-1, height - 3))
+        self.schedule.add(new_auto)
+        id_agente += 1
 
     def step(self):
         # Hacer avanzar el modelo
@@ -118,8 +126,8 @@ def agent_portrayal(agent):
                     "Layer": 1,
                     "Color": "black",
                     "scale": 0.5,
-                    "heading_x": 1,
-                    "heading_y": 0
+                    "heading_x": 0,
+                    "heading_y": 1
                     }
     elif isinstance(agent, Edificio):
         portrayal = {"Shape": "rect",
