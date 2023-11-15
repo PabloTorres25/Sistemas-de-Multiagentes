@@ -18,11 +18,11 @@ edificio = ((3,3),(12,6))
 
 
 def cubo(tupla: Tuple[Tuple[int,int]]) -> None:
-    print(tupla[0][1])
-    # for celda in tupla:
-
-    # for i in range(tupla[0])
-    #     print(celda)
+    print("Tupla: ")
+    rango = tupla[1][0] - tupla[0][0] + 1
+    print("Rango = ", rango)
+    for i in range(rango):
+        print(tupla[0][0] + i)
 
 
 

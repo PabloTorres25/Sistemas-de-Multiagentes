@@ -45,13 +45,16 @@ class CiudadModel(Model):
         ## Edificios
         id_edificio = 0
         for edificio in list_edif:
-            for celda in edificio:
-                        new_edificio = Edificio(id_edificio, self)
-                        X = celda[0] - 1
-                        Y = height - celda[1]
-                        self.grid.place_agent(new_edificio, (X,Y))
-                        self.schedule.add(new_edificio)
-                        id_edificio += 1
+            rango_x = edificio[1][0] - edificio[0][0] + 1
+            rango_y = edificio[1][1] - edificio[0][1] + 1
+            for i in range(rango_x):
+                for j in range(rango_y):
+                    new_edificio = Edificio(id_edificio, self)
+                    X = (edificio[0][0] + i) - 1
+                    Y = height - (edificio[0][1] + j)
+                    self.grid.place_agent(new_edificio, (X,Y))
+                    self.schedule.add(new_edificio)
+                    id_edificio += 1
 
         # new_auto = Auto(0, self)
         # self.grid.place_agent(new_auto, (5, 5))  # Agente en la posición (5, 5)
@@ -88,8 +91,19 @@ if __name__ == "__main__":
 
     # Mapa
     lista_edificios: Tuple[Tuple[Tuple[int,int], Tuple[int,int]]] = (
-        ((3,3),(12,6)), 
-        ((3,9),(5,12)) 
+        ((3,3),(12,6)),
+        ((17,3),(18,6)),
+        ((21,3),(22,6)), 
+        
+        ((3,9),(5,12)),
+        ((8,9),(12,12)),
+        ((17,9),(18,12)),
+        ((21,9),(22,12)),
+
+        ((3,17),(6,22)),
+        ((9,17),(12,22)),
+        ((17,17),(22,18)),
+        ((17,21),(22,22))
     )
     lista_estacionamientos = ( (10,3), (3,4) )
 
