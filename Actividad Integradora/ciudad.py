@@ -11,6 +11,7 @@ class Auto(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
+        self.destino = (3,4)
     
     def step(self):
         x, y = self.pos
