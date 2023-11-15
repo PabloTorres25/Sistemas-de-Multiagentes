@@ -11,15 +11,36 @@ class Auto(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
-        self.destino = (3,4)
+        view = "UP"
+        self.view = view
+        self.destino = [3,4]
     
     def step(self):
         x, y = self.pos
-        new_x = x
-        new_y = y + 1
+        pos_list = [x,y]
+        possible_moves = [
+            (x, y + 1),  # Arriba
+            (x, y - 1),  # Abajo
+            (x - 1, y),  # Derecha
+            (x + 1, y)   # Izquierda
+            
+            
+        ]
+        new_x = x + 1
+        new_y = y
+        
+        # Primero, vemos si esta en un estacionamiento que no sea el de destino
+        cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
+        estacion_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
+        if estacion_agents and pos_list != self.destino:
+            for move in possible_moves:
+                if self.model.grid.is_cell_empty(move):
+                    self.model.grid.move_agent(self, move)
 
-        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
-            self.model.grid.move_agent(self, (new_x, new_y))
+        # if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+        #     if self.model.grid.is_cell_empty((new_x, new_y)):
+        #         self.model.grid.move_agent(self, (new_x, new_y))
+        #     self.model.grid.move_agent(self, (new_x, new_y))
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -122,14 +143,12 @@ class CiudadModel(Model):
 
 def agent_portrayal(agent):
     if isinstance(agent, Auto):
-        portrayal = {"Shape": "arrowHead",
-                    "Filled": "true",
-                    "Layer": 1,
-                    "Color": "black",
-                    "scale": 0.5,
-                    "heading_x": 0,
-                    "heading_y": 1
-                    }
+        portrayal = {"Shape": "circle",
+                        "Filled": "true",
+                        "Layer": 1,
+                        "Color": "black",
+                        "r": 0.8
+                        }
     elif isinstance(agent, Edificio):
         portrayal = {"Shape": "rect",
                     "Filled": "true",
