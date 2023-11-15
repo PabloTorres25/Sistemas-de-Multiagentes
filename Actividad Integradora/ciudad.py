@@ -32,6 +32,17 @@ class Semaforo(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.orientacion = orientacion
+        self.steps = 0
+        self.Color = "00B050"
+    
+    def step(self):
+        self.steps += 1
+
+        if self.steps % 5 == 0:
+            if self.Color == "00B050":
+                self.Color = "FF0200"
+            else:
+                self.Color = "00B050"
 
 
 class CiudadModel(Model):
@@ -66,6 +77,19 @@ class CiudadModel(Model):
             self.schedule.add(new_glorieta)
             id_agente += 1
         
+        ## Semaforos
+        for semaforos in list_sem:
+            if (semaforos[1] == 'V'):
+                X = semaforos[0][0] - 1
+                Y = height - semaforos[0][1] - 1
+            else:
+                X = semaforos[0][0]
+                Y = height - semaforos[0][1]
+            new_semaforo = Semaforo(id_agente, self, semaforos[1])
+            self.grid.place_agent(new_semaforo, (X,Y))
+            self.schedule.add(new_semaforo)
+            id_agente += 1
+        
         ## Estacionamientos
         for estacionamiento in list_esta:
             new_estacionamiento = Estacionamiento(id_agente, self)
@@ -78,9 +102,6 @@ class CiudadModel(Model):
         # new_auto = Auto(0, self)
         # self.grid.place_agent(new_auto, (5, 5))  # Agente en la posición (5, 5)
         # self.schedule.add(new_auto)
-        
-
-        
 
 
     def step(self):
@@ -122,7 +143,7 @@ def agent_portrayal(agent):
                     "h": 1
                     }
     elif isinstance(agent, Semaforo):
-        if agent.orientation == "H":
+        if agent.orientacion == 'H':
             portrayal = {"Shape": "rect",
                         "Filled": "true",
                         "Layer": 0,
@@ -130,11 +151,11 @@ def agent_portrayal(agent):
                         "w": 2,
                         "h": 1
                         }
-        elif agent.orientacion == "V":
+        elif agent.orientacion == 'V':
             portrayal = {"Shape": "rect",
                         "Filled": "true",
                         "Layer": 0,
-                        "Color": "#FF0200",
+                        "Color": "#00B050",
                         "w": 1,
                         "h": 2
                         }
