@@ -75,11 +75,19 @@ def agent_portrayal(agent):
                         "Layer": 1,
                         "Color": "red",
                         "r": 0.5}
+    if isinstance(agent, Edificio):
+        portrayal = {"Shape": "rect",
+                    "Filled": "true",
+                    "Layer": 0,
+                    "Color": "#5B9BD5",
+                    "w": 1,
+                    "h": 1
+                    }
     else:
         portrayal = {"Shape": "rect",
                     "Filled": "true",
                     "Layer": 0,
-                    "Color": "blue",
+                    "Color": "black",
                     "w": 1,
                     "h": 1}
     return portrayal
@@ -90,7 +98,7 @@ if __name__ == "__main__":
     alto = 24
 
     # Mapa
-    lista_edificios: Tuple[Tuple[Tuple[int,int], Tuple[int,int]]] = (
+    lista_edificios: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
         ((3,3),(12,6)),
         ((17,3),(18,6)),
         ((21,3),(22,6)), 
@@ -105,7 +113,10 @@ if __name__ == "__main__":
         ((17,17),(22,18)),
         ((17,21),(22,22))
     )
-    lista_estacionamientos = ( (10,3), (3,4) )
+
+    lista_estacionamientos: Tuple[Tuple[int, int]] = ( 
+        (10,3), (3,4)
+    )
 
     # Autos
     numero_autos = 1
