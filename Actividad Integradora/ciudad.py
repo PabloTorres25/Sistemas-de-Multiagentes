@@ -80,11 +80,12 @@ class CiudadModel(Model):
 
 def agent_portrayal(agent):
     if isinstance(agent, Auto):
-            portrayal = {"Shape": "circle",
-                        "Filled": "true",
-                        "Layer": 1,
-                        "Color": "red",
-                        "r": 0.5}
+        portrayal = {"Shape": "circle",
+                    "Filled": "true",
+                    "Layer": 1,
+                    "Color": "red",
+                    "r": 0.5
+                    }
     elif isinstance(agent, Edificio):
         portrayal = {"Shape": "rect",
                     "Filled": "true",
@@ -98,6 +99,14 @@ def agent_portrayal(agent):
                     "Filled": "true",
                     "Layer": 0,
                     "Color": "#FFFF00",
+                    "w": 1,
+                    "h": 1
+                    }
+    elif isinstance(agent, Glorieta):
+        portrayal = {"Shape": "rect",
+                    "Filled": "true",
+                    "Layer": 0,
+                    "Color": "#833C0B",
                     "w": 1,
                     "h": 1
                     }
@@ -133,7 +142,7 @@ if __name__ == "__main__":
     )
 
     lista_estacionamientos: Tuple[Tuple[int, int]] = ( 
-        (10,3), (3,4)
+        (10,3), (3,4), (18,4), (12,5), (21,5), (7,6)
     )
 
     # Autos
