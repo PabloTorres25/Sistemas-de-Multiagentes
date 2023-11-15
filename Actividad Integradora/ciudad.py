@@ -33,15 +33,19 @@ class Semaforo(Agent):
         self.next_state = None
         self.orientacion = orientacion
         self.steps = 0
-    
-    def step(self):
-        self.steps += 1
+        if self.orientacion == 'V':
+            self.color = "00B050"
+        else:
+            self.color = "FF0200"
 
-        if self.steps % 5 == 0:
-            if self.color == "00B050":
-                self.color = "FF0200"
-            else:
-                self.color = "00B050"
+    # def step(self):
+    #     self.steps += 1
+
+    #     if self.steps % 5 == 0:
+    #         if self.color == "00B050":
+    #             self.color = "FF0200"
+    #         else:
+    #             self.color = "00B050"
 
 
 class CiudadModel(Model):
@@ -146,7 +150,7 @@ def agent_portrayal(agent):
             portrayal = {"Shape": "rect",
                         "Filled": "true",
                         "Layer": 0,
-                        "Color": "#FF0200",
+                        "Color": agent.color,
                         "w": 2,
                         "h": 1
                         }
@@ -154,7 +158,7 @@ def agent_portrayal(agent):
             portrayal = {"Shape": "rect",
                         "Filled": "true",
                         "Layer": 0,
-                        "Color": "#00B050",
+                        "Color": agent.color,
                         "w": 1,
                         "h": 2
                         }
