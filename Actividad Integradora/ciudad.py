@@ -28,9 +28,10 @@ class Glorieta(Agent):
         self.next_state = None
 
 class Semaforo(Agent):
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, orientacion):
         super().__init__(unique_id, model)
         self.next_state = None
+        self.orientacion = orientacion
 
 
 class CiudadModel(Model):
@@ -121,13 +122,22 @@ def agent_portrayal(agent):
                     "h": 1
                     }
     elif isinstance(agent, Semaforo):
-        portrayal = {"Shape": "rect",
-                    "Filled": "true",
-                    "Layer": 0,
-                    "Color": "#FF0200",
-                    "w": 1,
-                    "h": 1
-                    }
+        if agent.orientation == "H":
+            portrayal = {"Shape": "rect",
+                        "Filled": "true",
+                        "Layer": 0,
+                        "Color": "#FF0200",
+                        "w": 2,
+                        "h": 1
+                        }
+        elif agent.orientacion == "V":
+            portrayal = {"Shape": "rect",
+                        "Filled": "true",
+                        "Layer": 0,
+                        "Color": "#FF0200",
+                        "w": 1,
+                        "h": 2
+                        }
     else:
         portrayal = {"Shape": "rect",
                     "Filled": "true",
@@ -169,8 +179,11 @@ if __name__ == "__main__":
         ((14,14),(15,14),(14,15),(15,15))
     )
 
-    lista_semaforos: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
-        ((17,1),(17,2)),
+    lista_semaforos: Tuple[Tuple[Tuple[int, int], str]] = (
+        ((17,1), "V"), ((15,3), "H"), ((8,7), "V"),
+        ((6,9), "H"), ((1,12), "H"), ((3,13), "V"),
+        ((22,15), "V"), ((23,17), "H"), 
+        ((15,21), "H"), ((13,22), "H"), ((12,23), "V")
     )
 
     # Autos
