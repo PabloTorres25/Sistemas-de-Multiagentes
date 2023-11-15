@@ -34,7 +34,7 @@ class Semaforo(Agent):
 
 
 class CiudadModel(Model):
-    def __init__(self, width, height,num_autos, list_edif, list_esta, list_glorieta):
+    def __init__(self, width, height,num_autos, list_edif, list_esta, list_glor, list_sem):
         self.grid = MultiGrid(width, height, False)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
@@ -57,20 +57,16 @@ class CiudadModel(Model):
                     id_agente += 1
         
         ## Glorietas
-        for glorieta in list_edif:
-            rango_x = edificio[1][0] - edificio[0][0] + 1
-            rango_y = edificio[1][1] - edificio[0][1] + 1
-            for i in range(rango_x):
-                for j in range(rango_y):
-                    new_edificio = Edificio(id_agente, self)
-                    X = (edificio[0][0] + i) - 1
-                    Y = height - (edificio[0][1] + j)
-                    self.grid.place_agent(new_edificio, (X,Y))
-                    self.schedule.add(new_edificio)
-                    id_agente += 1
+        for glorieta in list_glor:
+            new_glorieta = Glorieta(id_agente, self)
+            X = glorieta[0] - 1
+            Y = height - glorieta[1]
+            self.grid.place_agent(new_glorieta, (X,Y))
+            self.schedule.add(new_glorieta)
+            id_agente += 1
         
         ## Estacionamientos
-        for estacionamiento in lista_estacionamientos:
+        for estacionamiento in list_esta:
             new_estacionamiento = Estacionamiento(id_agente, self)
             X = estacionamiento[0] - 1
             Y = height - estacionamiento[1]
@@ -170,7 +166,7 @@ if __name__ == "__main__":
     )
 
     lista_glorietas: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
-        ((14,13),(15,15))
+        ((14,14),(15,14),(14,15),(15,15))
     )
 
     lista_semaforos: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
