@@ -33,16 +33,15 @@ class Semaforo(Agent):
         self.next_state = None
         self.orientacion = orientacion
         self.steps = 0
-        self.Color = "00B050"
     
     def step(self):
         self.steps += 1
 
         if self.steps % 5 == 0:
-            if self.Color == "00B050":
-                self.Color = "FF0200"
+            if self.color == "00B050":
+                self.color = "FF0200"
             else:
-                self.Color = "00B050"
+                self.color = "00B050"
 
 
 class CiudadModel(Model):
