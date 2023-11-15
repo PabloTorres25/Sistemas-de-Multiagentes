@@ -11,9 +11,10 @@ class Auto(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
-        view = "UP"
-        self.view = view
-        self.destino = [3,4]
+        self.unique_id = unique_id
+        self.destino_or = [10,2]
+        self.destino = [self.destino_or[0] - 1, self.model.grid.height - self.destino_or[1]]
+        self.destino_bool = False
     
     def step(self):
         x, y = self.pos
@@ -28,14 +29,19 @@ class Auto(Agent):
         ]
         new_x = x + 1
         new_y = y
-        
-        # Primero, vemos si esta en un estacionamiento que no sea el de destino
-        cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
-        estacion_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
-        if estacion_agents and pos_list != self.destino:
-            for move in possible_moves:
-                if self.model.grid.is_cell_empty(move):
-                    self.model.grid.move_agent(self, move)
+
+        if pos_list == self.destino:
+            if (self.destino_bool == False):
+                print("LLEGUE A MI DESTINO!!!, ID = ", self.unique_id)
+                self.destino_bool == True
+        else:
+            # Primero, vemos si esta en un estacionamiento que no sea el de destino
+            cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
+            estacion_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
+            if estacion_agents and pos_list != self.destino:
+                for move in possible_moves:
+                    if self.model.grid.is_cell_empty(move):
+                        self.model.grid.move_agent(self, move)
 
         # if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
         #     if self.model.grid.is_cell_empty((new_x, new_y)):
