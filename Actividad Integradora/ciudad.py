@@ -39,22 +39,32 @@ class CiudadModel(Model):
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
         self.num_autos = num_autos
+        id_agente = 0
 
         # Construccion del Mapa
 
         ## Edificios
-        id_edificio = 0
+        
         for edificio in list_edif:
             rango_x = edificio[1][0] - edificio[0][0] + 1
             rango_y = edificio[1][1] - edificio[0][1] + 1
             for i in range(rango_x):
                 for j in range(rango_y):
-                    new_edificio = Edificio(id_edificio, self)
+                    new_edificio = Edificio(id_agente, self)
                     X = (edificio[0][0] + i) - 1
                     Y = height - (edificio[0][1] + j)
                     self.grid.place_agent(new_edificio, (X,Y))
                     self.schedule.add(new_edificio)
-                    id_edificio += 1
+                    id_agente += 1
+        
+        ## Estacionamientos
+        for estacionamiento in lista_estacionamientos:
+            new_estacionamiento = Estacionamiento(id_agente, self)
+            X = estacionamiento[0] - 1
+            Y = height - estacionamiento[1]
+            self.grid.place_agent(new_estacionamiento, (X,Y))
+            self.schedule.add(new_estacionamiento)
+            id_agente += 1
 
         # new_auto = Auto(0, self)
         # self.grid.place_agent(new_auto, (5, 5))  # Agente en la posición (5, 5)
@@ -75,11 +85,19 @@ def agent_portrayal(agent):
                         "Layer": 1,
                         "Color": "red",
                         "r": 0.5}
-    if isinstance(agent, Edificio):
+    elif isinstance(agent, Edificio):
         portrayal = {"Shape": "rect",
                     "Filled": "true",
                     "Layer": 0,
                     "Color": "#5B9BD5",
+                    "w": 1,
+                    "h": 1
+                    }
+    elif isinstance(agent, Estacionamiento):
+        portrayal = {"Shape": "rect",
+                    "Filled": "true",
+                    "Layer": 0,
+                    "Color": "#FFFF00",
                     "w": 1,
                     "h": 1
                     }
