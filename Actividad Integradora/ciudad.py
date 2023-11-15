@@ -92,11 +92,13 @@ class CiudadModel(Model):
 
 def agent_portrayal(agent):
     if isinstance(agent, Auto):
-        portrayal = {"Shape": "circle",
+        portrayal = {"Shape": "arrowHead",
                     "Filled": "true",
                     "Layer": 1,
-                    "Color": "red",
-                    "r": 0.5
+                    "Color": "black",
+                    "scale": 0.5,
+                    "heading_x": 1,
+                    "heading_y": 0
                     }
     elif isinstance(agent, Edificio):
         portrayal = {"Shape": "rect",
@@ -119,6 +121,14 @@ def agent_portrayal(agent):
                     "Filled": "true",
                     "Layer": 0,
                     "Color": "#833C0B",
+                    "w": 1,
+                    "h": 1
+                    }
+    elif isinstance(agent, Semaforo):
+        portrayal = {"Shape": "rect",
+                    "Filled": "true",
+                    "Layer": 0,
+                    "Color": "#FF0200",
                     "w": 1,
                     "h": 1
                     }
@@ -165,8 +175,6 @@ if __name__ == "__main__":
 
     lista_semaforos: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
         ((17,1),(17,2)),
-
-
     )
 
     # Autos
