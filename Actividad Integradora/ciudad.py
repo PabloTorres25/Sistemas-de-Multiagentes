@@ -34,9 +34,9 @@ class Semaforo(Agent):
         self.orientacion = orientacion
         self.steps = 0
         if self.orientacion == 'V':
-            self.color = "00B050"
+            self.color = "#00B050"
         else:
-            self.color = "FF0200"
+            self.color = "#FF0200"
 
     # def step(self):
     #     self.steps += 1
