@@ -29,11 +29,8 @@ class Auto(Agent):
 
     def girar_sin_opcion(self, pos_list, lista_celdas):
         for coor, direccion in lista_celdas:
-            print("Posición2 = ", pos_list)
-            print("Coordenada = ", coor)
             pos_list = tuple(pos_list)
             if pos_list == coor:
-                print("Son iguales!!!!")
                 return direccion # Se queda quieto un segundo, para simular que gira (Aunque no se vea)
         return None # O retorna un valor predeterminado si no encuentra una coincidencia
     
@@ -292,7 +289,12 @@ if __name__ == "__main__":
     lista_primeros_pasos: Tuple[Tuple[int, int], str] = (
         ((10,2),"Iz"), ((2,4),"Ab"), ((19,4),"Ab"), ((13,5),"Ab"),
         ((20,5),"Ab"),((7,7),"Iz"),
-        ((9,8),"Iz")
+
+        ((9,8),"Iz"), ((23,10),"Ar"), ((6,11),"Ar"), ((13,11),"Ab"),
+        ((16,12),"Ar"), 
+
+        ((2,18),"Ab"), ((18,19),"Iz"), ((20,19),"Iz"), ((7,21),"Ab"),
+        ((8,21),"Ab"), ((20,20),"Iz")
     )
     lista_primeros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_primeros_pasos)
 
