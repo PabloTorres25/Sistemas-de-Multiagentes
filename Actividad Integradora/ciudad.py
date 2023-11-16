@@ -311,7 +311,15 @@ if __name__ == "__main__":
         ((23,7),"Ar"), ((24,8),"Ar"),
         
         ((23,2),"Iz"), ((24,1),"Iz"),
-        ((16,1),"Iz"), ((15,2),"Iz")
+        ((16,1),"Iz"), ((15,2),"Iz"),
+
+        ((1,13),"Ab"), ((2,14),"Ab"),
+        ((6,8),"Iz"), ((7,7),"Iz"),
+
+        ((14,13),"Iz"), 
+        ((13,15),"Ab"),
+        ((15,16),"De"), 
+        ((14,16),"Ar"),
     )
     lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro) # La traducimos segun como Mesa la crea
     lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro) # Y sacamos unicamente sus coordenadas, para asi estar revisnado si estamos o no en una celda de giro
