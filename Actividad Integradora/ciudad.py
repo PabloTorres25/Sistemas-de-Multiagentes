@@ -3,7 +3,7 @@ from mesa.space import MultiGrid
 from mesa.time import SimultaneousActivation
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
-from typing import Tuple
+from typing import Tuple, Any
 import numpy as np
 
 
@@ -21,8 +21,8 @@ class Auto(Agent):
         self.movimientos_estado = {
             "Ar": (0, 1),   # Arriba
             "Ab": (0, -1),  # Abajo
-            "Iz": (1, 0),   # Izquierda
-            "De": (-1, 0)   # Derecha
+            "Iz": (-1, 0),  # Izquierda
+            "De": (1, 0)    # Derecha
         }
 
     
@@ -38,7 +38,7 @@ class Auto(Agent):
             # Primero, vemos si esta en un estacionamiento que no sea el de destino
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
-            
+            # Si esta en un estacionamiento
             if estacionamiento_agents:
                 for move in self.movimientos_estado.values():
                     new_pos = (x + move[0], y + move[1])
@@ -50,10 +50,14 @@ class Auto(Agent):
                 print("Holaaa")
                 for coor, direccion in lista_primeros_pasos:
                     coor_traducida = [coor[0] - 1, self.model.grid.height - coor[1]]
-                    if pos_list == coor:
+                    if pos_list == coor_traducida:
                         self.estado = direccion     # Dejare que se tarde un segundo, para simular que gira (Aunque no se vea)
                         print("Nueva dirección = ", self.estado)
                         self.primer_paso = True
+            # Si esta en una celda de giro
+            elif
+            # Si esta en una celda de descición 
+            elif
             else:
                 # Muevete segun tu estado
                  if self.estado in self.movimientos_estado:
@@ -260,14 +264,25 @@ if __name__ == "__main__":
         ((22,15), "V"), ((23,17), "H"), 
         ((15,21), "H"), ((13,22), "H"), ((12,23), "V")
     )
+
+    # Coordenadas especiales
     lista_primeros_pasos: Tuple[Tuple[int, int], str] = (
         ((10,2),"Iz"), ((2,4),"Ab"), ((19,4),"Ab"), ((13,5),"Ab"),
         ((20,5),"Ab"),((7,7),"Iz"),
-        ((9,8),"Iz")
+        ((9,8),"Iz")    # Aun faltan
+    )
+
+    lista_celdas_giro: Tuple[Tuple[int, int], str] = (
+        ((1,1),"Ab"), ((2,2),"Ab") 
+    )
+
+    Eleccion = Tuple[Tuple[int, int], Tuple[str, ...]]  # Cambiarlo si vemos que solo se utilizan maximo 2 str
+    lista_celdas_eleccion: Eleccion = (
+        ((1,16),"Ab","De"), ((2,15),"Ab", "De")
     )
 
     # Autos
-    numero_autos = 1
+    numero_autos = 1    # TODO: Hay que hacer que los Autos aparezcan solo en estacionamientos
 
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
     server = ModularServer(CiudadModel,
