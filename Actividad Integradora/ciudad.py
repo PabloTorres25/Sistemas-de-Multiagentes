@@ -299,16 +299,29 @@ if __name__ == "__main__":
     lista_primeros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_primeros_pasos)
 
     lista_celdas_giro: Tuple[Tuple[int, int], str] = (
-        ((1,1),"Ab"), ((2,2),"Ab") 
+        ((1,1),"Ab"), ((2,2),"Ab"),
+        ((1,7),"Ab"), ((2,8),"Ab"),
+        ((1,24),"De"), ((2,3),"De"),
+
+        ((7,24),"De"), ((2,2),"De"),
+        ((23,23),"Ar"), ((24,24),"Ar"),
+        ((15,20),"Ar"), ((16,19),"Ar"),
+
+        ((23,15),"Ar"), ((24,16),"Ar"),
+        ((23,7),"Ar"), ((24,8),"Ar"),
+        
+        ((23,2),"Iz"), ((24,1),"Iz"),
+        ((16,1),"Iz"), ((15,2),"Iz")
     )
     lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro) # La traducimos segun como Mesa la crea
     lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro) # Y sacamos unicamente sus coordenadas, para asi estar revisnado si estamos o no en una celda de giro
-    print("lista_giros_coor = ", lista_giros_coor)
 
     Eleccion = Tuple[Tuple[int, int], Tuple[str, ...]]  # Cambiarlo si vemos que solo se utilizan maximo 2 str
     lista_celdas_eleccion: Eleccion = (
         ((1,16),"Ab","De"), ((2,15),"Ab", "De")
     )
+    lista_eleccion_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_eleccion) # La traducimos segun como Mesa la crea
+    lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
 
     # Autos
     numero_autos = 1    # TODO: Hay que hacer que los Autos aparezcan solo en estacionamientos
