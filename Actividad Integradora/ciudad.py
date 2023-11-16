@@ -46,11 +46,11 @@ class Auto(Agent):
                         self.model.grid.move_agent(self, new_pos)
                         break
             # Si ya salio del estacionamiento
-            elif primer_paso == False:
+            elif self.primer_paso == False:
                 for coor, direccion in lista_primeros_pasos:
                     if pos_list == coor:
                         self.estado = direccion     # Dejare que se tarde un segundo, para simular que gira (Aunque no se vea)
-                        primer_paso = True
+                        self.primer_paso = True
             else:
                 # Muevete segun tu estado
                  if self.estado in self.movimientos_estado:
