@@ -42,14 +42,14 @@ from typing import Tuple
 # for i in range(2):
 #     print(i)
 
-alto = 24
+# alto = 24
 
 # lista_celdas_giro: Tuple[Tuple[int, int], str] = (
 #     ((1,1),"Ab"), ((2,2),"Ab") 
 # )
 
-def traduccion(val1, val2):
-    return val1 - 1, alto - val2 
+# def traduccion(val1, val2):
+#     return val1 - 1, alto - val2 
 
 # lista_traducida =tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro)
 
@@ -63,12 +63,21 @@ def traduccion(val1, val2):
 
 #1. Si es necesario convertirlo a tupla
 
-lista_celdas_giro: Tuple[Tuple[int, int], str] = (
-    ((1,1),"Ab"), ((2,2),"Ab") 
-)
+# lista_celdas_giro: Tuple[Tuple[int, int], str] = (
+#     ((1,1),"Ab"), ((2,2),"Ab") 
+# )
 
-lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro)
-print(lista_giros_coor)
+# lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro)
+# print(lista_giros_coor)
 
-pos_list = [1, 22]
-print(tuple(pos_list) in lista_giros_coor)
+# pos_list = [1, 22]
+# print(tuple(pos_list) in lista_giros_coor)
+
+import random
+
+A = ((1,16), ("Ab","De"))
+A2 = A[1]
+
+for i in range(10):
+    b = random.choice(A2)
+    print(b)

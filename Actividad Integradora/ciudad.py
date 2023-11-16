@@ -5,6 +5,7 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from typing import Tuple, Any
 import numpy as np
+import random
 
 def traduccion(val1, val2):
     return val1 - 1, alto - val2 
@@ -28,11 +29,20 @@ class Auto(Agent):
         }
 
     def girar_sin_opcion(self, pos_list, lista_celdas):
+        pos_list = tuple(pos_list)
         for coor, direccion in lista_celdas:
-            pos_list = tuple(pos_list)
             if pos_list == coor:
                 return direccion # Se queda quieto un segundo, para simular que gira (Aunque no se vea)
         return None # O retorna un valor predeterminado si no encuentra una coincidencia
+    
+    def girar_con_opciones(self, pos_list, lista_celdas):
+        pos_list = tuple(pos_list)
+        for coor, *direcciones in lista_celdas:
+                if pos_list == coor:
+                    direccion = random.choice(direcciones)
+                    print("Tome la elección = ", direccion)
+                    return direccion 
+        return None        
     
     def step(self):
         print("Posición = ", self.pos)
@@ -66,6 +76,13 @@ class Auto(Agent):
                 # Si esta en una celda de giro
                 if tuple(pos_list) in lista_giros_coor:
                     self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                    movimiento = self.movimientos_estado[self.estado]
+                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+                
+                # Si esta en una celda de elección
+                elif tuple(pos_list) in lista_eleccion_coor:
+                    print("Hare una elección")
+                    self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                     movimiento = self.movimientos_estado[self.estado]
                     self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
@@ -329,10 +346,12 @@ if __name__ == "__main__":
 
     Eleccion = Tuple[Tuple[int, int], Tuple[str, ...]]  # Cambiarlo si vemos que solo se utilizan maximo 2 str
     lista_celdas_eleccion: Eleccion = (
-        ((1,16),"Ab","De"), ((2,15),"Ab", "De")
+        ((1,16),"Ab","De"), ((2,15), "De", "Ab")
     )
     lista_eleccion_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_eleccion) # La traducimos segun como Mesa la crea
     lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
+    print(lista_eleccion_traducida)
+    print(lista_eleccion_coor)
 
     # Autos
     numero_autos = 1    # TODO: Hay que hacer que los Autos aparezcan solo en estacionamientos
