@@ -6,6 +6,8 @@ from mesa.visualization.ModularVisualization import ModularServer
 from typing import Tuple, Any
 import numpy as np
 
+def traduccion(val1, val2):
+    return val1 - 1, alto - val2 
 
 class Auto(Agent):
     def __init__(self, unique_id, model):
@@ -13,7 +15,7 @@ class Auto(Agent):
         self.next_state = None
         self.unique_id = unique_id
         self.destino_or = [3,4]
-        self.destino = [self.destino_or[0] - 1, self.model.grid.height - self.destino_or[1]]    # Traducción de las coordenadas de destino_or
+        self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
         self.estado = ""
@@ -25,14 +27,18 @@ class Auto(Agent):
             "De": (1, 0)    # Derecha
         }
 
-    def girar_sin_opcion(pos_list, lista_celdas):
+    def girar_sin_opcion(self, pos_list, lista_celdas):
         for coor, direccion in lista_celdas:
-            coor_traducida = (coor[0] - 1, self.model.grid.height - coor[1])
-            if pos_list == coor_traducida:
+            print("Posición2 = ", pos_list)
+            print("Coordenada = ", coor)
+            pos_list = tuple(pos_list)
+            if pos_list == coor:
+                print("Son iguales!!!!")
                 return direccion # Se queda quieto un segundo, para simular que gira (Aunque no se vea)
         return None # O retorna un valor predeterminado si no encuentra una coincidencia
     
     def step(self):
+        print("Posición = ", self.pos)
         x, y = self.pos
         pos_list = [x,y]
 
@@ -55,12 +61,23 @@ class Auto(Agent):
 
             # Si ya salio del estacionamiento
             elif self.primer_paso == False:
-                self.estado = girar_sin_opcion(pos_list, lista_primeros_pasos)   
+                print("Ya di mi primer paso, ahora ire al lado...")
+                self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
+                print(self.estado)
                 self.primer_paso = True
 
-            # Si esta en una celda de giro
-            elif pos_list in lista_celdas_giro:
-                self.estado = girar_sin_opcion(pos_list, lista_celdas_giro)
+            # Si esta en una celda de giro            
+            elif pos_list in lista_giros_traducida:
+                        for coor, direccion in lista_celdas:
+            print("Posición2 = ", pos_list)
+            print("Coordenada = ", coor)
+            pos_list = tuple(pos_list)
+            if pos_list == coor:
+                print("Son iguales!!!!")
+                return direccion
+                print("Oh miren una celda de giro, creo que ahora ire a...")
+                self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                print(self.estado)
 
             # # Si esta en una celda de descición 
             # elif pos_list in lista_celdas_eleccion:
@@ -113,7 +130,6 @@ class Semaforo(Agent):
                 self.color = "#FF0200"
             else:
                 self.color = "#00B050"
-
 
 class CiudadModel(Model):
     def __init__(self, width, height,num_autos, list_edif, list_esta, list_glor, list_sem):
@@ -282,10 +298,13 @@ if __name__ == "__main__":
         ((20,5),"Ab"),((7,7),"Iz"),
         ((9,8),"Iz")    # Aun faltan
     )
+    lista_primeros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_primeros_pasos)
 
     lista_celdas_giro: Tuple[Tuple[int, int], str] = (
         ((1,1),"Ab"), ((2,2),"Ab") 
     )
+    lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro)
+    print("lista_giros_traducida = ", lista_giros_traducida)
 
     Eleccion = Tuple[Tuple[int, int], Tuple[str, ...]]  # Cambiarlo si vemos que solo se utilizan maximo 2 str
     lista_celdas_eleccion: Eleccion = (
