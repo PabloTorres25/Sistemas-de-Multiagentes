@@ -65,9 +65,7 @@ class Auto(Agent):
 
                 # Si esta en una celda de giro
                 if tuple(pos_list) in lista_giros_coor:
-                    print("Oh miren una celda de giro, creo que ahora ire a...")
                     self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
-                    print(self.estado)
                     movimiento = self.movimientos_estado[self.estado]
                     self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
