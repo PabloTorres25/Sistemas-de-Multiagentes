@@ -59,7 +59,7 @@ class Auto(Agent):
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
 
             # Si esta en un estacionamiento
-            elif estacionamiento_agents:
+            if estacionamiento_agents:
                 for move in self.movimientos_estado.values():
                     new_pos = (x + move[0], y + move[1])
                     if self.model.grid.is_cell_empty(new_pos):
@@ -91,21 +91,22 @@ class Auto(Agent):
                 # Si esta en una celda de giro
                 elif tuple(pos_list) in lista_giros_coor:
                     self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
-                    movimiento = self.movimientos_estado[self.estado]
-                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+                    # movimiento = self.movimientos_estado[self.estado]
+                    # self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                 
                 # Si esta en una celda de elección
                 elif tuple(pos_list) in lista_eleccion_coor:
                     self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
-                    movimiento = self.movimientos_estado[self.estado]
-                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+                    # movimiento = self.movimientos_estado[self.estado]
+                    # self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                 
                 # Muevete segun tu estado
                 else:
                     if self.estado in self.movimientos_estado:
-                        if self.model.grid.is_cell_empty(new_pos):
                         movimiento = self.movimientos_estado[self.estado]
-                        self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+                        new_pos = (x + movimiento[0], y + movimiento[1])
+                        if self.model.grid.is_cell_empty(new_pos):
+                            self.model.grid.move_agent(self, new_pos)
 
         # if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
         #     if self.model.grid.is_cell_empty((new_x, new_y)):
