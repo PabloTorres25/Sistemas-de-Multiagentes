@@ -75,9 +75,19 @@ from typing import Tuple
 
 import random
 
-A = ((1,16), ("Ab","De"))
-A2 = A[1]
 
-for i in range(10):
-    b = random.choice(A2)
-    print(b)
+
+A: Tuple[Tuple[int, int], Tuple[str, str]] = (
+    ((1,16), ("Ab","De")), ((1,2), ("X", "Y"))
+)
+
+def girar_con_opciones(pos_list, lista_celdas):
+    pos_list = tuple(pos_list)
+    for coor, direccion in lista_celdas:
+            if pos_list == coor:
+                direccion = random.choice(direccion)
+                print("Tome la elección = ", direccion)
+                return direccion 
+    return None 
+
+print(girar_con_opciones([1,2], A))
