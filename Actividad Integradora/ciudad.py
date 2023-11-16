@@ -292,7 +292,7 @@ if __name__ == "__main__":
     lista_primeros_pasos: Tuple[Tuple[int, int], str] = (
         ((10,2),"Iz"), ((2,4),"Ab"), ((19,4),"Ab"), ((13,5),"Ab"),
         ((20,5),"Ab"),((7,7),"Iz"),
-        ((9,8),"Iz")    # Aun faltan
+        ((9,8),"Iz")
     )
     lista_primeros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_primeros_pasos)
 
