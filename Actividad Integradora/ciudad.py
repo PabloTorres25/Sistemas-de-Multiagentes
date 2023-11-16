@@ -37,10 +37,10 @@ class Auto(Agent):
     
     def girar_con_opciones(self, pos_list, lista_celdas):
         pos_list = tuple(pos_list)
-        for coor, direccion in lista_celdas:
-                if pos_list == coor:
-                    direccion = random.choice(direccion)
-                    return direccion 
+        for coor, dir in lista_celdas:
+            if pos_list == coor:
+                direccion = random.choice(dir)
+                return direccion 
         return None        
     
     def step(self):
@@ -337,7 +337,7 @@ if __name__ == "__main__":
         ((14,13),"Iz"), 
         ((13,15),"Ab"),
         ((15,16),"De"), 
-        ((14,16),"Ar"),
+        ((16,14),"Ar"),
     )
     lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro) # La traducimos segun como Mesa la crea
     lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro) # Y sacamos unicamente sus coordenadas, para asi estar revisnado si estamos o no en una celda de giro
@@ -359,10 +359,10 @@ if __name__ == "__main__":
         ((23,14),("Ar","Iz")), ((24,13),("Ar", "Iz")),
         ((23,20), ("Ar","Iz")), ((24,19), ("Ar", "Iz")),
 
-        ((1,16), ("Ab","De")),
-        ((2,15), ("Ab", "De")),
-        ((1,16), ("Ab","De")),
-        ((2,15), ("Ab", "De"))
+        ((13,13), ("Ab","Iz")),
+        ((13,16),("Ab", "De")),
+        ((16,13), ("Ar","Iz")),
+        ((16,16),("Ar", "De"))
     )
     lista_eleccion_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_eleccion) # La traducimos segun como Mesa la crea
     lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
