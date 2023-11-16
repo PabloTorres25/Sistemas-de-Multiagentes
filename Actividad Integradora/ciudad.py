@@ -62,20 +62,17 @@ class Auto(Agent):
 
             # Si ya salio del estacionamiento
             elif self.primer_paso == False:
-                print("Ya di mi primer paso, ahora ire al lado...")
                 self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
-                print(self.estado)
                 self.primer_paso = True
             else:
-                print("Checa esto")
-                print("post_lits", pos_list)
-                print("lista_giros_traducida", lista_giros_traducida)
 
                 # Si esta en una celda de giro
-                if pos_list in lista_giros_traducida:
+                if tuple(pos_list) in lista_giros_coor:
                     print("Oh miren una celda de giro, creo que ahora ire a...")
                     self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                     print(self.estado)
+                    movimiento = self.movimientos_estado[self.estado]
+                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
             # # Si esta en una celda de descición 
             # elif pos_list in lista_celdas_eleccion:
@@ -302,9 +299,9 @@ if __name__ == "__main__":
     lista_celdas_giro: Tuple[Tuple[int, int], str] = (
         ((1,1),"Ab"), ((2,2),"Ab") 
     )
-    lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro)
-    lista_giros_coor = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro)
-    print("lista_giros_traducida = ", lista_giros_traducida)
+    lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro) # La traducimos segun como Mesa la crea
+    lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro) # Y sacamos unicamente sus coordenadas, para asi estar revisnado si estamos o no en una celda de giro
+    print("lista_giros_coor = ", lista_giros_coor)
 
     Eleccion = Tuple[Tuple[int, int], Tuple[str, ...]]  # Cambiarlo si vemos que solo se utilizan maximo 2 str
     lista_celdas_eleccion: Eleccion = (
