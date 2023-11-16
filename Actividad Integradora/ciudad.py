@@ -46,8 +46,9 @@ class Auto(Agent):
             if (self.destino_bool == False):
                 print("LLEGUE A MI DESTINO!!!, Auto ID = ", self.unique_id)
                 self.destino_bool = True
-        else:
-            # Primero, vemos si esta en un estacionamiento que no sea el de destino
+         
+         # Primero, vemos si esta en un estacionamiento que no sea el de destino       
+        else:  
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
             
@@ -65,19 +66,16 @@ class Auto(Agent):
                 self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
                 print(self.estado)
                 self.primer_paso = True
+            else:
+                print("Checa esto")
+                print("post_lits", pos_list)
+                print("lista_giros_traducida", lista_giros_traducida)
 
-            # Si esta en una celda de giro            
-            elif pos_list in lista_giros_traducida:
-                        for coor, direccion in lista_celdas:
-            print("Posición2 = ", pos_list)
-            print("Coordenada = ", coor)
-            pos_list = tuple(pos_list)
-            if pos_list == coor:
-                print("Son iguales!!!!")
-                return direccion
-                print("Oh miren una celda de giro, creo que ahora ire a...")
-                self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
-                print(self.estado)
+                # Si esta en una celda de giro
+                if pos_list in lista_giros_traducida:
+                    print("Oh miren una celda de giro, creo que ahora ire a...")
+                    self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                    print(self.estado)
 
             # # Si esta en una celda de descición 
             # elif pos_list in lista_celdas_eleccion:
@@ -86,11 +84,12 @@ class Auto(Agent):
             #         if pos_list == coor_traducida:
             #             self.estado = estado
             #             break
-            else:
                 # Muevete segun tu estado
-                 if self.estado in self.movimientos_estado:
-                    movimiento = self.movimientos_estado[self.estado]
-                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+                else:
+                    
+                    if self.estado in self.movimientos_estado:
+                        movimiento = self.movimientos_estado[self.estado]
+                        self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
         # if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
         #     if self.model.grid.is_cell_empty((new_x, new_y)):
@@ -304,6 +303,7 @@ if __name__ == "__main__":
         ((1,1),"Ab"), ((2,2),"Ab") 
     )
     lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro)
+    lista_giros_coor = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro)
     print("lista_giros_traducida = ", lista_giros_traducida)
 
     Eleccion = Tuple[Tuple[int, int], Tuple[str, ...]]  # Cambiarlo si vemos que solo se utilizan maximo 2 str
