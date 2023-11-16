@@ -73,21 +73,39 @@ from typing import Tuple
 # pos_list = [1, 22]
 # print(tuple(pos_list) in lista_giros_coor)
 
-import random
+# import random
 
 
 
-A: Tuple[Tuple[int, int], Tuple[str, str]] = (
-    ((1,16), ("Ab","De")), ((1,2), ("X", "Y"))
-)
+# A: Tuple[Tuple[int, int], Tuple[str, str]] = (
+#     ((1,16), ("Ab","De")), ((1,2), ("X", "Y"))
+# )
 
-def girar_con_opciones(pos_list, lista_celdas):
-    pos_list = tuple(pos_list)
-    for coor, direccion in lista_celdas:
-            if pos_list == coor:
-                direccion = random.choice(direccion)
-                print("Tome la elección = ", direccion)
-                return direccion 
-    return None 
+# def girar_con_opciones(pos_list, lista_celdas):
+#     pos_list = tuple(pos_list)
+#     for coor, direccion in lista_celdas:
+#             if pos_list == coor:
+#                 direccion = random.choice(direccion)
+#                 print("Tome la elección = ", direccion)
+#                 return direccion 
+#     return None 
 
-print(girar_con_opciones([1,2], A))
+# print(girar_con_opciones([1,2], A))
+
+            # "Ar": (0, 1),   # Arriba
+            # "Ab": (0, -1),  # Abajo
+            # "Iz": (-1, 0),  # Izquierda
+            # "De": (1, 0)    # Derecha
+
+destino = [5,5]
+destino_ala_vista: Tuple[Tuple[int,int]] = []
+for i in range(1, 3):
+    destino_ala_vista += (
+        (destino[0], destino[1] + i),   # Arriba
+        (destino[0], destino[1] - i),   # Abajo
+        (destino[0] - i, destino[1]),   # Izquierda
+        (destino[0] + i, destino[1])    # Derecha
+    )
+
+
+print(destino_ala_vista)

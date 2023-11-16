@@ -52,28 +52,44 @@ class Auto(Agent):
             if (self.destino_bool == False):
                 print("LLEGUE A MI DESTINO!!!, Auto ID = ", self.unique_id)
                 self.destino_bool = True
-         
+        
          # Primero, vemos si esta en un estacionamiento que no sea el de destino       
         else:  
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
-            
+
             # Si esta en un estacionamiento
-            if estacionamiento_agents:
+            elif estacionamiento_agents:
                 for move in self.movimientos_estado.values():
                     new_pos = (x + move[0], y + move[1])
                     if self.model.grid.is_cell_empty(new_pos):
                         self.model.grid.move_agent(self, new_pos)
                         break
 
-            # Si ya salio del estacionamiento
+            # Si ya salio del estacionamiento, da su primer paso
             elif self.primer_paso == False:
                 self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
                 self.primer_paso = True
             else:
 
+                destino_ala_vista: Tuple[Tuple[int, int], str] = []
+                for i in range(1, 3):
+                    destino_ala_vista += (
+                        ((self.destino[0], self.destino[1] + i), "Ar"),   # Arriba
+                        ((self.destino[0], self.destino[1] - i), "Ab"),   # Abajo
+                        ((self.destino[0] - i, self.destino[1]), "Iz"),   # Izquierda
+                        ((self.destino[0] + i, self.destino[1]), "De")    # Derecha
+                    )
+
+                # Si ve su destino ve hacia el
+                if pos_list in destino_ala_vista:
+                    pos_list = tuple(pos_list)
+                    for coor, direccion in destino_ala_vista:
+                        if pos_list == coor:
+                            self.estado = direccion
+
                 # Si esta en una celda de giro
-                if tuple(pos_list) in lista_giros_coor:
+                elif tuple(pos_list) in lista_giros_coor:
                     self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                     movimiento = self.movimientos_estado[self.estado]
                     self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
@@ -83,18 +99,11 @@ class Auto(Agent):
                     self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                     movimiento = self.movimientos_estado[self.estado]
                     self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-
-            # # Si esta en una celda de descición 
-            # elif pos_list in lista_celdas_eleccion:
-            #     for coor, estado in lista_celdas_eleccion:
-            #         coor_traducida = [coor[0] - 1, self.model.grid.height - coor[1]]
-            #         if pos_list == coor_traducida:
-            #             self.estado = estado
-            #             break
+                
                 # Muevete segun tu estado
                 else:
-                    
                     if self.estado in self.movimientos_estado:
+                        if self.model.grid.is_cell_empty(new_pos):
                         movimiento = self.movimientos_estado[self.estado]
                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
@@ -193,7 +202,7 @@ class CiudadModel(Model):
         
         # Auto
         new_auto = Auto(id_agente, self)
-        self.grid.place_agent(new_auto, (10-1, height - 3))
+        self.grid.place_agent(new_auto, (20-1, height - 21))
         self.schedule.add(new_auto)
         id_agente += 1
 
