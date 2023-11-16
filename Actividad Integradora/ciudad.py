@@ -47,9 +47,12 @@ class Auto(Agent):
                         break
             # Si ya salio del estacionamiento
             elif self.primer_paso == False:
+                print("Holaaa")
                 for coor, direccion in lista_primeros_pasos:
+                    coor_traducida = [coor[0] - 1, self.model.grid.height - coor[1]]
                     if pos_list == coor:
                         self.estado = direccion     # Dejare que se tarde un segundo, para simular que gira (Aunque no se vea)
+                        print("Nueva dirección = ", self.estado)
                         self.primer_paso = True
             else:
                 # Muevete segun tu estado
