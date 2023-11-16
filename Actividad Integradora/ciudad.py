@@ -12,23 +12,23 @@ class Auto(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.destino_or = [10,2]
-        self.destino = [self.destino_or[0] - 1, self.model.grid.height - self.destino_or[1]]
+        self.destino_or = [3,4]
+        self.destino = [self.destino_or[0] - 1, self.model.grid.height - self.destino_or[1]]    # Traducción de las coordenadas de destino_or
         self.destino_bool = False
+        self.primer_paso = False
+        self.estado = ""
+
+        self.movimientos_estado = {
+            "Ar": (0, 1),   # Arriba
+            "Ab": (0, -1),  # Abajo
+            "Iz": (1, 0),   # Izquierda
+            "De": (-1, 0)   # Derecha
+        }
+
     
     def step(self):
         x, y = self.pos
         pos_list = [x,y]
-        possible_moves = [
-            (x, y + 1),  # Arriba
-            (x, y - 1),  # Abajo
-            (x - 1, y),  # Derecha
-            (x + 1, y)   # Izquierda
-            
-            
-        ]
-        new_x = x + 1
-        new_y = y
 
         if pos_list == self.destino:
             if (self.destino_bool == False):
@@ -37,11 +37,25 @@ class Auto(Agent):
         else:
             # Primero, vemos si esta en un estacionamiento que no sea el de destino
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
-            estacion_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
-            if estacion_agents and pos_list != self.destino:
-                for move in possible_moves:
-                    if self.model.grid.is_cell_empty(move):
-                        self.model.grid.move_agent(self, move)
+            estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
+            
+            if estacionamiento_agents:
+                for move in self.movimientos_estado.values():
+                    new_pos = (x + move[0], y + move[1])
+                    if self.model.grid.is_cell_empty(new_pos):
+                        self.model.grid.move_agent(self, new_pos)
+                        break
+            # Si ya salio del estacionamiento
+            elif primer_paso == False:
+                for coor, direccion in lista_primeros_pasos:
+                    if pos_list == coor:
+                        self.estado = direccion     # Dejare que se tarde un segundo, para simular que gira (Aunque no se vea)
+                        primer_paso = True
+            else:
+                # Muevete segun tu estado
+                 if self.estado in self.movimientos_estado:
+                    movimiento = self.movimientos_estado[self.estado]
+                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
         # if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
         #     if self.model.grid.is_cell_empty((new_x, new_y)):
@@ -243,12 +257,10 @@ if __name__ == "__main__":
         ((22,15), "V"), ((23,17), "H"), 
         ((15,21), "H"), ((13,22), "H"), ((12,23), "V")
     )
-    # Aqui te quecaste
-    # Tu idea, es definir las direcciones de todas las calles, para que cuando los autos esten ahi vayan en esas direcciones
-    # Pero te quedaste, en que tenias problemas, cuando por ejemplo dos calles chochan (1,1 - 2,2)
-    lista_direcciones = (
-        (((1,1),(24,2)),"D"),
-        (((1,3),(24,2)),"D")
+    lista_primeros_pasos: Tuple[Tuple[int, int], str] = (
+        ((10,2),"Iz"), ((2,4),"Ab"), ((19,4),"Ab"), ((13,5),"Ab"),
+        ((20,5),"Ab"),((7,7),"Iz"),
+        ((9,8),"Iz")
     )
 
     # Autos
