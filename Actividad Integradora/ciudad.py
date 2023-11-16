@@ -25,6 +25,12 @@ class Auto(Agent):
             "De": (1, 0)    # Derecha
         }
 
+    def girar_sin_opcion(pos_list, lista_celdas):
+        for coor, direccion in lista_celdas:
+            coor_traducida = (coor[0] - 1, self.model.grid.height - coor[1])
+            if pos_list == coor_traducida:
+                return direccion # Se queda quieto un segundo, para simular que gira (Aunque no se vea)
+        return None # O retorna un valor predeterminado si no encuentra una coincidencia
     
     def step(self):
         x, y = self.pos
@@ -38,6 +44,7 @@ class Auto(Agent):
             # Primero, vemos si esta en un estacionamiento que no sea el de destino
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
+            
             # Si esta en un estacionamiento
             if estacionamiento_agents:
                 for move in self.movimientos_estado.values():
@@ -45,19 +52,23 @@ class Auto(Agent):
                     if self.model.grid.is_cell_empty(new_pos):
                         self.model.grid.move_agent(self, new_pos)
                         break
+
             # Si ya salio del estacionamiento
             elif self.primer_paso == False:
-                print("Holaaa")
-                for coor, direccion in lista_primeros_pasos:
-                    coor_traducida = [coor[0] - 1, self.model.grid.height - coor[1]]
-                    if pos_list == coor_traducida:
-                        self.estado = direccion     # Dejare que se tarde un segundo, para simular que gira (Aunque no se vea)
-                        print("Nueva dirección = ", self.estado)
-                        self.primer_paso = True
+                self.estado = girar_sin_opcion(pos_list, lista_primeros_pasos)   
+                self.primer_paso = True
+
             # Si esta en una celda de giro
-            elif
-            # Si esta en una celda de descición 
-            elif
+            elif pos_list in lista_celdas_giro:
+                self.estado = girar_sin_opcion(pos_list, lista_celdas_giro)
+
+            # # Si esta en una celda de descición 
+            # elif pos_list in lista_celdas_eleccion:
+            #     for coor, estado in lista_celdas_eleccion:
+            #         coor_traducida = [coor[0] - 1, self.model.grid.height - coor[1]]
+            #         if pos_list == coor_traducida:
+            #             self.estado = estado
+            #             break
             else:
                 # Muevete segun tu estado
                  if self.estado in self.movimientos_estado:
