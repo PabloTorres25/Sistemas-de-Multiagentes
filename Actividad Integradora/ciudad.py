@@ -84,6 +84,7 @@ class Auto(Agent):
                 self.primer_paso = True
             
             elif semaforo_agents:
+                print("Semaforo en Rojo")
                 for sema in semaforo_agents:
                     if sema.color == "#FF0200":
                         self.model.grid.move_agent(self, (x, y))
@@ -164,7 +165,7 @@ class Semaforo(Agent):
 
     def step(self):
         self.steps += 1
-        if self.steps % 10 == 0:
+        if self.steps % 20 == 0:
             if self.color == "#00B050":
                 self.color = "#FF0200"
             else:
@@ -226,7 +227,12 @@ class CiudadModel(Model):
         
         # Auto
         new_auto = Auto(id_agente, self)
-        self.grid.place_agent(new_auto, (10-1, height - 3))
+        self.grid.place_agent(new_auto, (10 - 1, height - 3))
+        self.schedule.add(new_auto)
+        id_agente += 1
+
+        new_auto = Auto(id_agente, self)
+        self.grid.place_agent(new_auto, (3 - 1, height - 4))
         self.schedule.add(new_auto)
         id_agente += 1
 
@@ -272,7 +278,7 @@ def agent_portrayal(agent):
                         "Filled": "true",
                         "Layer": 0,
                         "Color": agent.color,
-                        "w": 2,
+                        "w": 1,
                         "h": 1
                         }
         elif agent.orientacion == 'V':
@@ -281,7 +287,7 @@ def agent_portrayal(agent):
                         "Layer": 0,
                         "Color": agent.color,
                         "w": 1,
-                        "h": 2
+                        "h": 1
                         }
     else:
         portrayal = {"Shape": "rect",
@@ -419,7 +425,7 @@ if __name__ == "__main__":
 
 # Todo 
 # Estacionamientos (Listo)
-# Semaforos 
+# Semaforos (Listo)
 # Otros Autos
 #   No chocar
 #   Diferentes velocidades
