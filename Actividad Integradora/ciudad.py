@@ -101,10 +101,16 @@ class Auto(Agent):
                             else:
                                 print("Aqui hay algoo")
                                 # Hay algo entre tu destino y tu, que es?
-                                cell_contents2 = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
-                                Edifico_agent = [agent for agent in cell_contents if isinstance(agent, Edificio)]
+                                cell_contents = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
+                                edifico_agent = [agent for agent in cell_contents if isinstance(agent, Edificio)]
+                                estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
+                                # Si es tu destino ve!!!
+                                if estacionamiento_agents and new_pos == self.destino:
+                                    self.estado = direccion
+                                    movimiento = self.movimientos_estado[self.estado]
+                                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                                 # Si es una pared de un edificio mejor sigue caminando
-                                if Edifico_agent:
+                                elif edifico_agent:
                                     print("Es una pared")
                                     movimiento = self.movimientos_estado[self.estado]
                                     self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
