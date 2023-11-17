@@ -56,13 +56,12 @@ class Auto(Agent):
         return None        
     
     def step(self):
-        print("Posición = ", self.pos)
         x, y = self.pos
         pos_list = [x,y]
 
         if tuple(pos_list) == self.destino:
             if (self.destino_bool == False):
-                print("LLEGUE A MI DESTINO!!!, Auto ID = ", self.unique_id)
+                print(f"LLEGUÉ A MI DESTINO!!!, Auto ID = {self.unique_id}")
                 self.destino_bool = True
         
          # Primero, vemos si esta en un estacionamiento que no sea el de destino       
