@@ -10,17 +10,21 @@ import random
 def traduccion(val1, val2):
     return val1 - 1, alto - val2 
 
+def trad_2(val1, val2):
+    return val1 +1, alto - val2 
+
 class Auto(Agent):
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, destino_or):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.destino_or = [3,4]
+        self.destino_or = destino_or
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
         self.estado = ""
         self.funcion = ""
+        self.pos_trad = (self.pos)
 
         self.destino_ala_vista = (
                 ((self.destino[0], self.destino[1] + 1), "Ab"),   # Arriba
@@ -59,6 +63,7 @@ class Auto(Agent):
     def step(self):
         x, y = self.pos
         pos_list = [x,y]
+        self.pos_trad = (trad_2(x,y))
 
         if tuple(pos_list) == self.destino:
             if (self.destino_bool == False):
@@ -258,7 +263,8 @@ class CiudadModel(Model):
         contador_autos = 0
         for coche in list_esta:
             if contador_autos < self.num_autos:
-                new_auto = Auto(id_agente, self)
+                new_destiny = random.choice([e for e in list_esta if e != coche])
+                new_auto = Auto(id_agente, self, new_destiny)
                 self.grid.place_agent(new_auto, (traduccion(coche[0], coche[1])))
                 self.schedule.add(new_auto)
                 id_agente += 1
@@ -340,7 +346,7 @@ def get_auto_info(model):
     auto_info = []
     for agent in model.schedule.agents:
         if isinstance(agent, Auto):
-            auto_info.append(f"Auto ID: {agent.unique_id},  Destino: {agent.destino_or}, Posición: {agent.pos}, Dirección: {agent.estado}, Estado: {agent.funcion}")
+            auto_info.append(f"Auto ID: {agent.unique_id},  Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Dirección: {agent.estado}, Estado: {agent.funcion}")
     return auto_info
 
 class AutoInfoText(TextElement):
