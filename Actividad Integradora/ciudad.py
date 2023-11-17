@@ -37,7 +37,7 @@ class Auto(Agent):
             "Ar": (0, 1),   # Arriba
             "Ab": (0, -1),  # Abajo
             "Iz": (-1, 0),  # Izquierda
-            "De": (1, 0)    # Derecha
+            "De": (1, 0),   # Derecha
         }
 
     def girar_sin_opcion(self, pos_list, lista_celdas):
@@ -86,7 +86,7 @@ class Auto(Agent):
             elif semaforo_agents:
                 for sema in semaforo_agents:
                     if sema.color == "#FF0200":
-                        print("Alto")
+                        self.model.grid.move_agent(self, (x, y))
                     elif sema.color == "#00B050":
                         movimiento = self.movimientos_estado[self.estado]
                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
