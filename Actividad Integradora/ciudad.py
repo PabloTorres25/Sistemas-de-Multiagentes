@@ -21,6 +21,19 @@ class Auto(Agent):
         self.primer_paso = False
         self.estado = ""
 
+        self.destino_ala_vista = (
+                ((self.destino[0], self.destino[1] + 1), "Ab"),   # Arriba
+                ((self.destino[0], self.destino[1] - 1), "Ar"),   # Abajo
+                ((self.destino[0] - 1, self.destino[1]), "De"),   # Izquierda
+                ((self.destino[0] + 1, self.destino[1]), "Iz"),   # Derecha
+                ((self.destino[0], self.destino[1] + 2), "Ab"),   # Arriba 2
+                ((self.destino[0], self.destino[1] - 2), "Ar"),   # Abajo 2
+                ((self.destino[0] - 2, self.destino[1]), "De"),   # Izquierda 2
+                ((self.destino[0] + 2, self.destino[1]), "Iz"),   # Derecha 2
+        )
+        self.destino_vista_coor = tuple(tupla[0] for tupla in self.destino_ala_vista)
+        print(self.destino_vista_coor)
+
         self.movimientos_estado = {
             "Ar": (0, 1),   # Arriba
             "Ab": (0, -1),  # Abajo
@@ -71,23 +84,31 @@ class Auto(Agent):
                 self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
                 self.primer_paso = True
             else:
-
-                destino_ala_vista: Tuple[Tuple[int, int], str] = []
-                for i in range(1, 3):
-                    destino_ala_vista += (
-                        ((self.destino[0], self.destino[1] + i), "Ar"),   # Arriba
-                        ((self.destino[0], self.destino[1] - i), "Ab"),   # Abajo
-                        ((self.destino[0] - i, self.destino[1]), "Iz"),   # Izquierda
-                        ((self.destino[0] + i, self.destino[1]), "De")    # Derecha
-                    )
-
-                # Si ve su destino ve hacia el
-                if pos_list in destino_ala_vista:
+                # Si vé su destino ve hacia el
+                if tuple(pos_list) in self.destino_vista_coor:
+                    print("Destino a la vistaaa")
                     pos_list = tuple(pos_list)
-                    for coor, direccion in destino_ala_vista:
+                    for coor, direccion in self.destino_ala_vista:
                         if pos_list == coor:
-                            self.estado = direccion
-
+                            print("Dirección = ", direccion)
+                            movimiento = self.movimientos_estado[direccion]
+                            new_pos = (x + movimiento[0], y + movimiento[1])
+                            print("Tendria que ir a ", new_pos)
+                            # Si ya ves tu destuno y no hay nada enmedio, ve hacia el
+                            if self.model.grid.is_cell_empty(new_pos):
+                                print("Bien, no hay nada enmedio")
+                                self.estado = direccion
+                            else:
+                                print("Aqui hay algoo")
+                                # Hay algo entre tu destino y tu, que es?
+                                cell_contents2 = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
+                                Edifico_agent = [agent for agent in cell_contents if isinstance(agent, Edificio)]
+                                # Si es una pared de un edificio mejor sigue caminando
+                                if Edifico_agent:
+                                    print("Es una pared")
+                                    movimiento = self.movimientos_estado[self.estado]
+                                    self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+                                
                 # Si esta en una celda de giro
                 elif tuple(pos_list) in lista_giros_coor:
                     self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)    # Cambiamos el estado

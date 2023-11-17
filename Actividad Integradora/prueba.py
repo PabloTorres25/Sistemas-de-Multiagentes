@@ -97,15 +97,33 @@ from typing import Tuple
             # "Iz": (-1, 0),  # Izquierda
             # "De": (1, 0)    # Derecha
 
-destino = [5,5]
-destino_ala_vista: Tuple[Tuple[int,int]] = []
-for i in range(1, 3):
-    destino_ala_vista += (
-        (destino[0], destino[1] + i),   # Arriba
-        (destino[0], destino[1] - i),   # Abajo
-        (destino[0] - i, destino[1]),   # Izquierda
-        (destino[0] + i, destino[1])    # Derecha
-    )
+# destino = [5,5]
+# destino_ala_vista: Tuple[Tuple[int,int]] = []
+# for i in range(1, 3):
+#     destino_ala_vista += (
+#         (destino[0], destino[1] + i),   # Arriba
+#         (destino[0], destino[1] - i),   # Abajo
+#         (destino[0] - i, destino[1]),   # Izquierda
+#         (destino[0] + i, destino[1])    # Derecha
+#     )
 
 
-print(destino_ala_vista)
+# print(destino_ala_vista)
+
+destino = [3,4]
+
+#------------------------------------------------------------------------------------------------
+destino_ala_vista = (
+        ((destino[0], destino[1] + 1), "Ar"),   # Arriba
+        ((destino[0], destino[1] - 1), "Ab"),   # Abajo
+        ((destino[0] - 1, destino[1]), "Iz"),   # Izquierda
+        ((destino[0] + 1, destino[1]), "De"),   # Derecha
+        ((destino[0], destino[1] + 2), "Ar"),   # Arriba 2
+        ((destino[0], destino[1] - 2), "Ab"),   # Abajo 2
+        ((destino[0] - 2, destino[1]), "Iz"),   # Izquierda 2
+        ((destino[0] + 2, destino[1]), "De"),   # Derecha 2
+)
+
+destino_vista_coor = tuple(tupla[0] for tupla in destino_ala_vista)
+
+print(destino_vista_coor[1])
