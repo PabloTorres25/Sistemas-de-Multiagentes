@@ -103,8 +103,7 @@ class Auto(Agent):
                             movimiento = self.movimientos_estado[self.estado]
                             self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
-                else:   # Comienza a andar 
-
+                else:   
                     # Si vé su destino ve hacia el
                     if tuple(pos_list) in self.destino_vista_coor:
                         pos_list = tuple(pos_list)
@@ -113,7 +112,7 @@ class Auto(Agent):
                                 movimiento = self.movimientos_estado[direccion]
                                 new_pos = (x + movimiento[0], y + movimiento[1])
 
-                                # Si ya ves tu destuno y no hay nada enmedio, ve hacia el
+                                # Si ya ves tu destino y no hay nada enmedio, ve hacia el
                                 if self.model.grid.is_cell_empty(new_pos):
                                     self.estado = direccion
                                     movimiento = self.movimientos_estado[self.estado]
