@@ -61,7 +61,7 @@ class Auto(Agent):
         x, y = self.pos
         pos_list = [x,y]
 
-        if pos_list == self.destino:
+        if tuple(pos_list) == self.destino:
             if (self.destino_bool == False):
                 print("LLEGUE A MI DESTINO!!!, Auto ID = ", self.unique_id)
                 self.destino_bool = True
