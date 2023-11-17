@@ -15,7 +15,7 @@ class Auto(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.destino_or = [3,18]
+        self.destino_or = [20,21]
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
@@ -32,7 +32,6 @@ class Auto(Agent):
                 ((self.destino[0] + 2, self.destino[1]), "Iz"),   # Derecha 2
         )
         self.destino_vista_coor = tuple(tupla[0] for tupla in self.destino_ala_vista)
-        print(self.destino_vista_coor)
 
         self.movimientos_estado = {
             "Ar": (0, 1),   # Arriba
@@ -70,7 +69,7 @@ class Auto(Agent):
         else:  
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
-
+            semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
             # Si esta en un estacionamiento
             if estacionamiento_agents:
                 for move in self.movimientos_estado.values():
@@ -83,6 +82,14 @@ class Auto(Agent):
             elif self.primer_paso == False:
                 self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
                 self.primer_paso = True
+            
+            elif semaforo_agents:
+                for sema in semaforo_agents:
+                    if sema.color == "#FF0200":
+                        print("Alto")
+                    elif sema.color == "#00B050":
+                        movimiento = self.movimientos_estado[self.estado]
+                        self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
             else:
                 # Si vé su destino ve hacia el
                 if tuple(pos_list) in self.destino_vista_coor:
@@ -129,11 +136,6 @@ class Auto(Agent):
                         movimiento = self.movimientos_estado[self.estado]
                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
-        # if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
-        #     if self.model.grid.is_cell_empty((new_x, new_y)):
-        #         self.model.grid.move_agent(self, (new_x, new_y))
-        #     self.model.grid.move_agent(self, (new_x, new_y))
-
 class Edificio(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
@@ -156,9 +158,9 @@ class Semaforo(Agent):
         self.orientacion = orientacion
         self.steps = 0
         if self.orientacion == 'V':
-            self.color = "#00B050"
+            self.color = "#00B050"  # Verde 
         else:
-            self.color = "#FF0200"
+            self.color = "#FF0200"  # Rojo
 
     def step(self):
         self.steps += 1
