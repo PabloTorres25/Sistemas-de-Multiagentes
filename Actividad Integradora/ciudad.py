@@ -70,6 +70,7 @@ class Auto(Agent):
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
             semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
+            
             # Si esta en un estacionamiento
             if estacionamiento_agents:
                 for move in self.movimientos_estado.values():
@@ -83,15 +84,31 @@ class Auto(Agent):
                 self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
                 self.primer_paso = True
             
+            # Si encuentra un semaforo
             elif semaforo_agents:
                 print("Semaforo en Rojo")
                 for sema in semaforo_agents:
-                    if sema.color == "#FF0200":
+                    if sema.color == "#FF0200": # Rojo, Alto
                         self.model.grid.move_agent(self, (x, y))
-                    elif sema.color == "#00B050":
+                    elif sema.color == "#00B050": # Verde, Siga
                         movimiento = self.movimientos_estado[self.estado]
                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-            else:
+
+            else:   # Comienza a andar 
+
+
+
+                movimiento = self.movimientos_estado[self.estado]
+                new_pos = (x + movimiento[0], y + movimiento[1])
+                cell_future = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
+                auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
+
+                # si encuentra otro coche, Alto
+                # if auto_agent:
+                #     self.model.grid.move_agent(self, (x, y))
+
+
+
                 # Si vé su destino ve hacia el
                 if tuple(pos_list) in self.destino_vista_coor:
                     pos_list = tuple(pos_list)
@@ -99,6 +116,7 @@ class Auto(Agent):
                         if pos_list == coor:
                             movimiento = self.movimientos_estado[direccion]
                             new_pos = (x + movimiento[0], y + movimiento[1])
+
                             # Si ya ves tu destuno y no hay nada enmedio, ve hacia el
                             if self.model.grid.is_cell_empty(new_pos):
                                 self.estado = direccion
@@ -106,9 +124,8 @@ class Auto(Agent):
                                 self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                             else:
                                 # Hay algo entre tu destino y tu, que es?
-                                cell_contents = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
-                                edifico_agent = [agent for agent in cell_contents if isinstance(agent, Edificio)]
-                                estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
+                                edifico_agent = [agent for agent in cell_future if isinstance(agent, Edificio)]
+                                estacionamiento_agents = [agent for agent in cell_future if isinstance(agent, Estacionamiento)]
                                 # Si es tu destino ve!!!
                                 if estacionamiento_agents and new_pos == self.destino:
                                     self.estado = direccion
@@ -172,7 +189,7 @@ class Semaforo(Agent):
                 self.color = "#00B050"
 
 class CiudadModel(Model):
-    def __init__(self, width, height,num_autos, list_edif, list_esta, list_glor, list_sem):
+    def __init__(self, width, height, num_autos, list_edif, list_esta, list_glor, list_sem):
         self.grid = MultiGrid(width, height, False)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
@@ -188,53 +205,44 @@ class CiudadModel(Model):
             for i in range(rango_x):
                 for j in range(rango_y):
                     new_edificio = Edificio(id_agente, self)
-                    X = (edificio[0][0] + i) - 1
-                    Y = height - (edificio[0][1] + j)
-                    self.grid.place_agent(new_edificio, (X,Y))
+                    self.grid.place_agent(new_edificio, (traduccion((edificio[0][0] + i), (edificio[0][1] + j))))
                     self.schedule.add(new_edificio)
                     id_agente += 1
         
         ## Glorietas
         for glorieta in list_glor:
             new_glorieta = Glorieta(id_agente, self)
-            X = glorieta[0] - 1
-            Y = height - glorieta[1]
-            self.grid.place_agent(new_glorieta, (X,Y))
+            self.grid.place_agent(new_glorieta, (traduccion(glorieta[0], glorieta[1])))
             self.schedule.add(new_glorieta)
             id_agente += 1
         
         ## Semaforos
         for semaforos in list_sem:
-            if (semaforos[1] == 'V'):
-                X = semaforos[0][0] - 1
-                Y = height - semaforos[0][1] - 1
-            else:
-                X = semaforos[0][0]
-                Y = height - semaforos[0][1]
+            X = semaforos[0][0] -1
+            Y = height - semaforos[0][1]
             new_semaforo = Semaforo(id_agente, self, semaforos[1])
-            self.grid.place_agent(new_semaforo, (X,Y))
+            self.grid.place_agent(new_semaforo, (traduccion(semaforos[0][0], semaforos[0][1])))
             self.schedule.add(new_semaforo)
             id_agente += 1
         
         ## Estacionamientos
         for estacionamiento in list_esta:
             new_estacionamiento = Estacionamiento(id_agente, self)
-            X = estacionamiento[0] - 1
-            Y = height - estacionamiento[1]
-            self.grid.place_agent(new_estacionamiento, (X,Y))
+            self.grid.place_agent(new_estacionamiento, (traduccion(estacionamiento[0], estacionamiento[1])))
             self.schedule.add(new_estacionamiento)
             id_agente += 1
         
-        # Auto
-        new_auto = Auto(id_agente, self)
-        self.grid.place_agent(new_auto, (10 - 1, height - 3))
-        self.schedule.add(new_auto)
-        id_agente += 1
-
-        new_auto = Auto(id_agente, self)
-        self.grid.place_agent(new_auto, (3 - 1, height - 4))
-        self.schedule.add(new_auto)
-        id_agente += 1
+        # Autos
+        contador_autos = 0
+        for coche in list_esta:
+            if contador_autos < self.num_autos:
+                new_auto = Auto(id_agente, self)
+                self.grid.place_agent(new_auto, (traduccion(coche[0], coche[1])))
+                self.schedule.add(new_auto)
+                id_agente += 1
+                contador_autos += 1
+            else:
+                break
 
     def step(self):
         # Hacer avanzar el modelo
@@ -330,20 +338,12 @@ if __name__ == "__main__":
         ((14,14),(15,14),(14,15),(15,15))
     )
 
-    # lista_semaforos: Tuple[Tuple[Tuple[int, int], str]] = (
-    #     ((17,1), "V"), ((17,2), "V"), ((15,3), "H"), ((16,3), "H"), ((8,7), "V"), ((8,8), "V"),
-    #     ((6,9), "H"), ((7,9), "H"), ((1,12), "H"), ((2,12), "H"), ((3,13), "V"), ((3,14), "V"),
-    #     ((22,15), "V"), ((22,16), "V"), ((23,17), "H"), ((24,17), "H"), 
-    #     ((15,21), "H"), ((16,21), "H"), ((13,22), "H"), ((14,22), "H"), ((12,23), "V"), ((12,24), "V")
-    # )
-
     lista_semaforos: Tuple[Tuple[Tuple[int, int], str]] = (
-        ((17,1), "V"), ((15,3), "H"), ((8,7), "V"),
-        ((6,9), "H"), ((1,12), "H"), ((3,13), "V"),
-        ((22,15), "V"), ((23,17), "H"), 
-        ((15,21), "H"), ((13,22), "H"), ((12,23), "V")
+        ((17,1), "V"), ((17,2), "V"), ((15,3), "H"), ((16,3), "H"), ((8,7), "V"), ((8,8), "V"),
+        ((6,9), "H"), ((7,9), "H"), ((1,12), "H"), ((2,12), "H"), ((3,13), "V"), ((3,14), "V"),
+        ((22,15), "V"), ((22,16), "V"), ((23,17), "H"), ((24,17), "H"), 
+        ((15,21), "H"), ((16,21), "H"), ((13,22), "H"), ((14,22), "H"), ((12,23), "V"), ((12,24), "V")
     )
-
 
     # Coordenadas especiales
     lista_primeros_pasos: Tuple[Tuple[int, int], str] = (
@@ -351,7 +351,7 @@ if __name__ == "__main__":
         ((20,5),"Ab"),((7,7),"Iz"),
 
         ((9,8),"Iz"), ((23,10),"Ar"), ((6,11),"Ar"), ((13,11),"Ab"),
-        ((16,12),"Ar"), 
+        ((16,11),"Ar"), 
 
         ((2,18),"Ab"), ((18,19),"Iz"), ((20,19),"Iz"), ((7,21),"Ab"),
         ((8,21),"Ab"), ((20,20),"Iz")
@@ -415,7 +415,7 @@ if __name__ == "__main__":
     lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
 
     # Autos
-    numero_autos = 1    # TODO: Hay que hacer que los Autos aparezcan solo en estacionamientos
+    numero_autos = 7
 
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
     server = ModularServer(CiudadModel,
@@ -436,5 +436,3 @@ if __name__ == "__main__":
 # Semaforos (Listo)
 # Otros Autos
 #   No chocar
-#   Diferentes velocidades
-#   Arrebasarlos
