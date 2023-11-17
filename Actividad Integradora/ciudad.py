@@ -416,8 +416,8 @@ if __name__ == "__main__":
 
 
 # Todo 
-# Estacionamientos
-# Semaforos
+# Estacionamientos (Listo)
+# Semaforos 
 # Otros Autos
 #   No chocar
 #   Diferentes velocidades
