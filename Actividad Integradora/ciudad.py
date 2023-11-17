@@ -15,7 +15,7 @@ class Auto(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.destino_or = [3,4]
+        self.destino_or = [3,18]
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
@@ -86,20 +86,17 @@ class Auto(Agent):
             else:
                 # Si vé su destino ve hacia el
                 if tuple(pos_list) in self.destino_vista_coor:
-                    print("Destino a la vistaaa")
                     pos_list = tuple(pos_list)
                     for coor, direccion in self.destino_ala_vista:
                         if pos_list == coor:
-                            print("Dirección = ", direccion)
                             movimiento = self.movimientos_estado[direccion]
                             new_pos = (x + movimiento[0], y + movimiento[1])
-                            print("Tendria que ir a ", new_pos)
                             # Si ya ves tu destuno y no hay nada enmedio, ve hacia el
                             if self.model.grid.is_cell_empty(new_pos):
-                                print("Bien, no hay nada enmedio")
                                 self.estado = direccion
+                                movimiento = self.movimientos_estado[self.estado]
+                                self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                             else:
-                                print("Aqui hay algoo")
                                 # Hay algo entre tu destino y tu, que es?
                                 cell_contents = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
                                 edifico_agent = [agent for agent in cell_contents if isinstance(agent, Edificio)]
@@ -111,7 +108,6 @@ class Auto(Agent):
                                     self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                                 # Si es una pared de un edificio mejor sigue caminando
                                 elif edifico_agent:
-                                    print("Es una pared")
                                     movimiento = self.movimientos_estado[self.estado]
                                     self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                                 
