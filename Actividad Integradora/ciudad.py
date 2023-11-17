@@ -19,8 +19,8 @@ class Auto(Agent):
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
-        
         self.estado = ""
+        self.funcion = ""
 
         self.destino_ala_vista = (
                 ((self.destino[0], self.destino[1] + 1), "Ab"),   # Arriba
@@ -63,6 +63,7 @@ class Auto(Agent):
         if tuple(pos_list) == self.destino:
             if (self.destino_bool == False):
                 print(f"LLEGUÉ A MI DESTINO!!!, Auto ID = {self.unique_id}")
+                self.funcion = "Destino"
                 self.destino_bool = True
         
          # Primero, vemos si esta en un estacionamiento que no sea el de destino       
@@ -77,11 +78,13 @@ class Auto(Agent):
                     new_pos = (x + move[0], y + move[1])
                     if self.model.grid.is_cell_empty(new_pos):
                         self.model.grid.move_agent(self, new_pos)
+                        self.funcion = "Estacionamiento"
                         break
 
             # Si ya salio del estacionamiento, da su primer paso
             elif self.primer_paso == False:
                 self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
+                self.funcion = "Primer Paso"
                 self.primer_paso = True
             
             else:
@@ -93,15 +96,17 @@ class Auto(Agent):
 
                     # si encuentra otro coche, Alto
                     if auto_agent:
+                        self.funcion = "Auto enfrente"
                         self.model.grid.move_agent(self, (x, y))
                     
                     # Si encuentra un semaforo
                     elif semaforo_agents:
-                        print("Semaforo en Rojo")
                         for sema in semaforo_agents:
                             if sema.color == "#FF0200": # Rojo, Alto
+                                self.funcion = "En semaforo(rojo)"
                                 self.model.grid.move_agent(self, (x, y))
                             elif sema.color == "#00B050": # Verde, Siga
+                                self.funcion = "En semaforo(verde)"
                                 movimiento = self.movimientos_estado[self.estado]
                                 self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
@@ -116,6 +121,7 @@ class Auto(Agent):
 
                                     # Si ya ves tu destino y no hay nada enmedio, ve hacia el
                                     if self.model.grid.is_cell_empty(new_pos):
+                                        self.funcion = "vista destino (1)"
                                         self.estado = direccion
                                         movimiento = self.movimientos_estado[self.estado]
                                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
@@ -125,22 +131,26 @@ class Auto(Agent):
                                         estacionamiento_agents = [agent for agent in cell_future if isinstance(agent, Estacionamiento)]
                                         # Si es tu destino ve!!!
                                         if estacionamiento_agents and new_pos == self.destino:
+                                            self.funcion = "vista destino (2)"
                                             self.estado = direccion
                                             movimiento = self.movimientos_estado[self.estado]
                                             self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                                         # Si es una pared de un edificio mejor sigue caminando
                                         elif edifico_agent:
+                                            self.funcion = "vista destino (3)"
                                             movimiento = self.movimientos_estado[self.estado]
                                             self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                                         
                         # Si esta en una celda de giro
                         elif tuple(pos_list) in lista_giros_coor:
+                            self.funcion = "celda de giro"
                             self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)    # Cambiamos el estado
                             movimiento = self.movimientos_estado[self.estado]
                             self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                         
                         # Si esta en una celda de elección
                         elif tuple(pos_list) in lista_eleccion_coor:
+                            self.funcion = "celda de eleccion"
                             self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                             movimiento = self.movimientos_estado[self.estado]
                             self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
@@ -148,6 +158,7 @@ class Auto(Agent):
                         # Muevete segun tu estado
                         else:
                             if self.estado in self.movimientos_estado:
+                                self.funcion = "Avanzando"
                                 movimiento = self.movimientos_estado[self.estado]
                                 self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
@@ -251,7 +262,9 @@ def agent_portrayal(agent):
                         "Filled": "true",
                         "Layer": 1,
                         "Color": "black",
-                        "r": 0.8
+                        "r": 0.8,
+                        "text": agent.unique_id,
+                        "text": agent.funcion,
                         }
     elif isinstance(agent, Edificio):
         portrayal = {"Shape": "rect",
@@ -307,7 +320,7 @@ def get_auto_info(model):
     auto_info = []
     for agent in model.schedule.agents:
         if isinstance(agent, Auto):
-            auto_info.append(f"Auto ID: {agent.unique_id},  Destino: {agent.destino_or}, Posición: {agent.pos}")
+            auto_info.append(f"Auto ID: {agent.unique_id},  Destino: {agent.destino_or}, Posición: {agent.pos}, Dirección: {agent.estado}, Estado: {agent.funcion}")
     return auto_info
 
 class AutoInfoText(TextElement):
@@ -429,7 +442,7 @@ if __name__ == "__main__":
     lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
 
     # Autos
-    numero_autos = 7
+    numero_autos = 1
 
     info_text = AutoInfoText()
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
