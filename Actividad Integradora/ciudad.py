@@ -15,7 +15,7 @@ class Auto(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.destino_or = [20,21]
+        self.destino_or = [3,4]
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
@@ -127,6 +127,7 @@ class Auto(Agent):
                                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
                                     else:
                                         # Hay algo entre tu destino y tu, que es?
+                                        cell_future = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
                                         edifico_agent = [agent for agent in cell_future if isinstance(agent, Edificio)]
                                         estacionamiento_agents = [agent for agent in cell_future if isinstance(agent, Estacionamiento)]
                                         # Si es tu destino ve!!!
@@ -263,8 +264,7 @@ def agent_portrayal(agent):
                         "Layer": 1,
                         "Color": "black",
                         "r": 0.8,
-                        "text": agent.unique_id,
-                        "text": agent.funcion,
+                        "text": agent.unique_id
                         }
     elif isinstance(agent, Edificio):
         portrayal = {"Shape": "rect",
