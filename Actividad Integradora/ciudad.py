@@ -467,7 +467,7 @@ if __name__ == "__main__":
     lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
 
     # Autos
-    numero_autos = 1
+    numero_autos = 5    # Maximo 17, uno en cada estacionamiento
 
     info_text = AutoInfoText()
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
