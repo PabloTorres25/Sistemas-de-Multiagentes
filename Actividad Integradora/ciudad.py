@@ -15,7 +15,7 @@ class Auto(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.destino_or = [9,9]
+        self.destino_or = [3,4]
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
@@ -90,7 +90,6 @@ class Auto(Agent):
             else:
                 movimiento = self.movimientos_estado[self.estado]
                 new_pos = (x + movimiento[0], y + movimiento[1])
-                print(new_pos)
                 if 0 <= new_pos[0] < self.model.grid.width and 0 <= new_pos[1] < self.model.grid.height:
                     cell_future = self.model.grid.get_cell_list_contents([new_pos])
                     auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
@@ -175,7 +174,7 @@ class Auto(Agent):
                         self.funcion = "celda de eleccion"
                         self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                         movimiento = self.movimientos_estado[self.estado]
-                        
+
 class Edificio(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
@@ -204,7 +203,7 @@ class Semaforo(Agent):
 
     def step(self):
         self.steps += 1
-        if self.steps % 20 == 0:
+        if self.steps % 10 == 0:
             if self.color == "#00B050":
                 self.color = "#FF0200"
             else:
@@ -217,6 +216,7 @@ class CiudadModel(Model):
         self.running = True # Para la visualizacion usando navegador
         self.num_autos = num_autos
         id_agente = 0
+        self.autos_destino = 0 
 
         # Construccion del Mapa
 
@@ -269,6 +269,13 @@ class CiudadModel(Model):
     def step(self):
         # Hacer avanzar el modelo
         self.schedule.step()
+        self.verificar_autos_llegados()
+
+    def verificar_autos_llegados(self):
+        autos_destino = sum(1 for agent in self.schedule.agents if isinstance(agent, Auto) and agent.destino_bool)
+        if autos_destino == self.num_autos:  #Cuando todos los autos lleguen a su destino termina el programa
+            self.running = False
+            print("Todos los autos han llegado a su destino!!!")
 
 def agent_portrayal(agent):
     if isinstance(agent, Auto):
@@ -345,6 +352,15 @@ class AutoInfoText(TextElement):
         info_html = ''.join([f'<div>{line}</div> <div>&nbsp;</div>' for line in info])
         return f'<div style="position: absolute; top: 70px; left: 10px; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{info_html}</div>'
 
+class FinalMessage(TextElement):
+    def __init__(self):
+        super().__init__()
+
+    def render(self, model):
+        if model.autos_destino == model.num_autos:
+            return "Todos los autos han llegado a su destino!!!"
+        else:
+            return ""
 
 if __name__ == "__main__":
     # Medidas
@@ -458,9 +474,10 @@ if __name__ == "__main__":
     numero_autos = 1
 
     info_text = AutoInfoText()
+    mensaje_final = FinalMessage()
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
     server = ModularServer(CiudadModel,
-                        [grid, info_text],
+                        [grid, info_text, mensaje_final],
                         "Ciudad Model",
                         {"width": ancho, "height": alto, 
                         "num_autos": numero_autos,
