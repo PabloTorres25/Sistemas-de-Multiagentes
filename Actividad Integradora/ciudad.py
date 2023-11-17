@@ -352,16 +352,6 @@ class AutoInfoText(TextElement):
         info_html = ''.join([f'<div>{line}</div> <div>&nbsp;</div>' for line in info])
         return f'<div style="position: absolute; top: 70px; left: 10px; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{info_html}</div>'
 
-class FinalMessage(TextElement):
-    def __init__(self):
-        super().__init__()
-
-    def render(self, model):
-        if model.autos_destino == model.num_autos:
-            return "Todos los autos han llegado a su destino!!!"
-        else:
-            return ""
-
 if __name__ == "__main__":
     # Medidas
     ancho = 24
@@ -474,10 +464,9 @@ if __name__ == "__main__":
     numero_autos = 1
 
     info_text = AutoInfoText()
-    mensaje_final = FinalMessage()
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
     server = ModularServer(CiudadModel,
-                        [grid, info_text, mensaje_final],
+                        [grid, info_text],
                         "Ciudad Model",
                         {"width": ancho, "height": alto, 
                         "num_autos": numero_autos,
