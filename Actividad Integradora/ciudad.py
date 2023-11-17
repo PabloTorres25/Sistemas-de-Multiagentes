@@ -15,7 +15,7 @@ class Auto(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.destino_or = [3,4]
+        self.destino_or = [9,9]
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
