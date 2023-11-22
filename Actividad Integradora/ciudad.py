@@ -180,7 +180,7 @@ class Auto(Agent):
                         self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                         movimiento = self.movimientos_estado[self.estado]
 
-class Autobuses(Agent):
+class Autobus(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
@@ -296,6 +296,15 @@ def agent_portrayal(agent):
                         "Layer": 1,
                         "Color": "black",
                         "r": 0.8,
+                        "text": agent.unique_id
+                        }
+    elif isinstance(agent, Autobus):
+        portrayal = {"Shape": "rect",
+                        "Filled": "true",
+                        "Layer": 1,
+                        "Color": "black",
+                        "w": 1.6,  
+                        "h": 1.6,
                         "text": agent.unique_id
                         }
     elif isinstance(agent, Edificio):
