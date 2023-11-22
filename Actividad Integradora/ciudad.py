@@ -180,6 +180,11 @@ class Auto(Agent):
                         self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                         movimiento = self.movimientos_estado[self.estado]
 
+class Autobuses(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.next_state = None
+
 class Edificio(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
@@ -261,6 +266,7 @@ class CiudadModel(Model):
         
         # Autos
         contador_autos = 0
+        destinos_disponibles = list(list_esta)
         for coche in list_esta:
             if contador_autos < self.num_autos:
                 new_destiny = random.choice([e for e in list_esta if e != coche])
@@ -485,7 +491,4 @@ if __name__ == "__main__":
 
 
 # Todo 
-# Estacionamientos (Listo)
-# Semaforos (Listo)
-# Otros Autos
-#   No chocar
+# Autobuses
