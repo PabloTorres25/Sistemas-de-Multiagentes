@@ -8,7 +8,7 @@ import numpy as np
 import random
 
 def traduccion(val1, val2):
-    return val1 - 1, alto - val2 
+    return val1 - 1, alto - val2
 
 def trad_2(val1, val2):
     return val1 +1, alto - val2 

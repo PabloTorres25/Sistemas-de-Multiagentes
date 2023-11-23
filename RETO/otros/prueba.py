@@ -1,4 +1,4 @@
-from typing import Tuple
+# from typing import Tuple
 
 # def coordenadas(tupla: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]]) -> None:
 #     for edificio in tupla:
@@ -110,20 +110,30 @@ from typing import Tuple
 
 # print(destino_ala_vista)
 
-destino = [3,4]
+# destino = [3,4]
+
+# #------------------------------------------------------------------------------------------------
+# destino_ala_vista = (
+#         ((destino[0], destino[1] + 1), "Ar"),   # Arriba
+#         ((destino[0], destino[1] - 1), "Ab"),   # Abajo
+#         ((destino[0] - 1, destino[1]), "Iz"),   # Izquierda
+#         ((destino[0] + 1, destino[1]), "De"),   # Derecha
+#         ((destino[0], destino[1] + 2), "Ar"),   # Arriba 2
+#         ((destino[0], destino[1] - 2), "Ab"),   # Abajo 2
+#         ((destino[0] - 2, destino[1]), "Iz"),   # Izquierda 2
+#         ((destino[0] + 2, destino[1]), "De"),   # Derecha 2
+# )
+
+# destino_vista_coor = tuple(tupla[0] for tupla in destino_ala_vista)
+
+# print(destino_vista_coor[1])
 
 #------------------------------------------------------------------------------------------------
-destino_ala_vista = (
-        ((destino[0], destino[1] + 1), "Ar"),   # Arriba
-        ((destino[0], destino[1] - 1), "Ab"),   # Abajo
-        ((destino[0] - 1, destino[1]), "Iz"),   # Izquierda
-        ((destino[0] + 1, destino[1]), "De"),   # Derecha
-        ((destino[0], destino[1] + 2), "Ar"),   # Arriba 2
-        ((destino[0], destino[1] - 2), "Ab"),   # Abajo 2
-        ((destino[0] - 2, destino[1]), "Iz"),   # Izquierda 2
-        ((destino[0] + 2, destino[1]), "De"),   # Derecha 2
-)
 
-destino_vista_coor = tuple(tupla[0] for tupla in destino_ala_vista)
+lista = [1,2,3,4,5]
 
-print(destino_vista_coor[1])
+for i in range(10):
+	valor = lista[i % len(lista)]
+	print(valor)
+
+#------------------------------------------------------------------------------------------------
