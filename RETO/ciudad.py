@@ -386,8 +386,9 @@ class CiudadModel(Model):
         # self.verificar_autos_llegados()   # Descomentar para que el programa termine cuando todos los autos hayan llegado a su destino
         
         # Borrar Agentes que ya llegaron a su destino
-        if agente.llego_a_destino:
-            self.remover_agente(agente)
+        for agente in self.schedule.agents:
+            if isinstance(agente, Auto) and agente.llego_a_destino:
+                self.remover_agente(agente)
 
     def verificar_autos_llegados(self):
         autos_destino = sum(1 for agent in self.schedule.agents if isinstance(agent, Auto) and agent.destino_bool)
