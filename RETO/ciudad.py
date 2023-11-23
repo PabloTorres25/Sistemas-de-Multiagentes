@@ -618,7 +618,7 @@ if __name__ == "__main__":
     )
 
     # Autos
-    numero_autos = 1        # Maximo 17, uno en cada estacionamiento
+    numero_autos = 17        # Maximo 17, uno en cada estacionamiento
     numero_autobuses = 1    # Maximo 7, uno en cada parada
 
     info_text = AutoInfoText()
