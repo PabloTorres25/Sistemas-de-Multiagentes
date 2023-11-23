@@ -192,9 +192,6 @@ class Autobus(Agent):
         self.tiempo_max_parada = 10
         self.direccion = direccion
         self.estado = "Inicio"
-        self.semaforo_verde = False
-        self.ya_elegi = False
-        self.ya_gire = False
         self.pos_trad = (self.pos)
         
         self.movimientos_direccion = {
@@ -217,7 +214,31 @@ class Autobus(Agent):
             if pos_list == coor:
                 direccion = random.choice(dir)
                 return direccion 
-        return None 
+        return None
+    
+    def avanza_con_precaucion(self):
+        x, y = self.pos
+        movimiento = self.movimientos_direccion[self.direccion] # Avanza uno en la dirección del agente
+        new_pos = (x + movimiento[0], y + movimiento[1])
+        # Si tu siguiente celda no se sale del mapa
+        if 0 <= new_pos[0] < self.model.grid.width and 0 <= new_pos[1] < self.model.grid.height:
+            # Revisa que hay enfrente
+            cell_future = self.model.grid.get_cell_list_contents([new_pos])
+            auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
+            bus_agent = [agent for agent in cell_future if isinstance(agent, Autobus)]
+
+            # Si hay alguien adelante, detente
+            if auto_agent or bus_agent:
+                self.estado = "Vehiculo enfrente"
+                return False
+            else:
+                
+                self.model.grid.move_agent(self, new_pos)
+                return True
+        else:
+            # El siguiente paso se sale del mapa
+            return False 
+                self.model.grid.move_agent(self, (x, y))
 
     def step(self):
         x, y = self.pos
@@ -236,60 +257,37 @@ class Autobus(Agent):
                 self.estado = "Eligiendo nueva parada..."
                 self.tiempo_parada = 0
         else:
-            # Si tu siguiente celda no se sale del mapa
-            movimiento = self.movimientos_direccion[self.direccion]
-            new_pos = (x + movimiento[0], y + movimiento[1])
-            if 0 <= new_pos[0] < self.model.grid.width and 0 <= new_pos[1] < self.model.grid.height:
-                
-                # Revisa que hay enfrente
-                cell_future = self.model.grid.get_cell_list_contents([new_pos])
-                auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
-                bus_agent = [agent for agent in cell_future if isinstance(agent, Autobus)]
-                # Si hay alguien adelante, detente
-                if auto_agent or bus_agent:
-                    self.estado = "Vehiculo enfrente"
-                    self.model.grid.move_agent(self, (x, y))
+            # Sino, Revisa que hay donde tu estas
+            cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
+            semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
+            # Si hay un semáforo
+            if semaforo_agents and self.semaforo_verde == False:
+                for sema in semaforo_agents:
+                    if sema.color == "#FF0200": # Rojo, Alto
+                        self.estado = "En semaforo(rojo)"
+                        self.model.grid.move_agent(self, (x, y))
+                    else:   # Verde, Avanza
+                        self.estado = "En semaforo(verde)"
+                        avanza_con_precaucion()
 
-                else:
-                    # Sino, Revisa que hay donde tu estas
-                    cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
-                    semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
-                    # Si hay un semáforo
-                    if semaforo_agents and self.semaforo_verde == False:
-                        for sema in semaforo_agents:
-                            if sema.color == "#FF0200": # Rojo, Alto
-                                self.estado = "En semaforo(rojo)"
-                                self.model.grid.move_agent(self, (x, y))
-                            else:
-                                self.semaforo_verde = True
-                    # Si hay una vuelta y no has girado
-                    elif tuple(pos_list) in lista_giros_coor and self.ya_gire == False:
-                        # Si tu dirección es diferente a la que tiene, gira
-                        if self.direccion != self.girar_sin_opcion(pos_list, lista_giros_traducida):
-                            self.estado = "celda de giro"
-                            self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
-                            self.ya_gire = True
-                    # Si hay una decisión y no has decidido
-                    elif tuple(pos_list) in lista_eleccion_coor and self.ya_elegi == False:
-                        self.estado = "celda de eleccion"
-                        self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
-                        self.ya_elegi = True
-                    # Si no hay nada de lo anterior, avanza
-                    else:
-                        self.ya_gire = False
-                        self.ya_elegi = False
-                        self.estado = "Avanzando"
-                        movimiento = self.movimientos_direccion[self.direccion]
-                        self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+            # Si hay una vuelta
+            elif tuple(pos_list) in lista_giros_coor:
+                # Gira
+                self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                self.estado = "celda de giro"
+                avanza_con_precaucion()
+            # Si hay una decisión
+            elif tuple(pos_list) in lista_eleccion_coor:
+                # Escoge
+                self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                self.estado = "celda de eleccion"
+                avanza_con_precaucion()
+            # Si no hay nada de lo anterior, avanza
             else:
-                # Si hay una vuelta, gira
-                if tuple(pos_list) in lista_giros_coor:
-                    self.estado = "celda de giro"
-                    self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
-                # Si hay una decisión, escoge
-                elif tuple(pos_list) in lista_eleccion_coor:
-                    self.estado = "celda de eleccion"
-                    self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                avanza_con_precaucion()
+                self.estado = "Avanzando"
+                movimiento = self.movimientos_direccion[self.direccion]
+                self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
