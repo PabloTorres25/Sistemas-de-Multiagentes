@@ -23,6 +23,7 @@ class Auto(Agent):
         self.direccion = ""
         self.estado = "Inicio"
         self.pos_trad = (self.pos)
+        self.llego_a_destino = False
 
         self.destino_ala_vista = (
                 ((self.destino[0], self.destino[1] + 1), "Ab"),   # Arriba
@@ -58,6 +59,30 @@ class Auto(Agent):
                 return direccion 
         return None        
     
+    def avanza_con_precaucion(self):
+        x, y = self.pos
+        movimiento = self.movimientos_direccion[self.direccion] # Avanza uno en la dirección del agente
+        new_pos = (x + movimiento[0], y + movimiento[1])
+        # Si tu siguiente celda no se sale del mapa
+        if 0 <= new_pos[0] < self.model.grid.width and 0 <= new_pos[1] < self.model.grid.height:
+            # Revisa que hay enfrente
+            cell_future = self.model.grid.get_cell_list_contents([new_pos])
+            auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
+            bus_agent = [agent for agent in cell_future if isinstance(agent, Autobus)]
+
+            # Si hay alguien adelante, detente
+            if auto_agent or bus_agent:
+                self.estado = "Vehiculo enfrente"
+                return False
+            else:
+                # AVANZA
+                self.estado = "Avanzando"
+                self.model.grid.move_agent(self, new_pos)
+                return True
+        else:
+            # El siguiente paso se sale del mapa
+            return False
+
     def step(self):
         x, y = self.pos
         pos_list = [x,y]
@@ -67,8 +92,9 @@ class Auto(Agent):
             if self.destino_bool == False:
                 self.estado = "Destino"
                 self.destino_bool = True
-            if self.destino_bool == True:
-                # BORRATE    
+            else:
+                # BORRATE
+                self.llego_a_destino = True
         else:
             # Revisa que hay donde tu estas
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
@@ -77,101 +103,60 @@ class Auto(Agent):
             
             # Si hay un estacionamiento
             if estacionamiento_agents:
-                for move in self.movimientos_estado.values():
+                for move in self.movimientos_direccion.values():
                     new_pos = (x + move[0], y + move[1])
                     if self.model.grid.is_cell_empty(new_pos):
-                        self.funcion = "Saliendo Estacionamiento"
+                        self.estado = "Saliendo Estacionamiento"
                         self.model.grid.move_agent(self, new_pos)   # SAL
-                        self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida) # Toma una dirección
+                        self.direccion = self.girar_sin_opcion(pos_list, lista_primeros_traducida) # Toma una dirección
                         break
-            else:
-                movimiento = self.movimientos_estado[self.estado]
-                new_pos = (x + movimiento[0], y + movimiento[1])
-                if 0 <= new_pos[0] < self.model.grid.width and 0 <= new_pos[1] < self.model.grid.height:
-                    cell_future = self.model.grid.get_cell_list_contents([new_pos])
-                    auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
-                    bus_agent = [agent for agent in cell_future if isinstance(agent, Autobus)]
 
-                    # si encuentra otro vehiculo, Alto
-                    if auto_agent or bus_agent:
-                        self.funcion = "Vehiculo enfrente"
-                        self.model.grid.move_agent(self, (x, y))
-                    
-                    # Si encuentra un semaforo
-                    elif semaforo_agents:
-                        for sema in semaforo_agents:
-                            if sema.color == "#FF0200": # Rojo, Alto
-                                self.funcion = "En semaforo(rojo)"
-                                self.model.grid.move_agent(self, (x, y))
-                            elif sema.color == "#00B050": # Verde, Siga
-                                self.funcion = "En semaforo(verde)"
-                                movimiento = self.movimientos_estado[self.estado]
-                                self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-
-                    else:   
-                        # Si vé su destino ve hacia el
-                        if tuple(pos_list) in self.destino_vista_coor:
-                            pos_list = tuple(pos_list)
-                            for coor, direccion in self.destino_ala_vista:
-                                if pos_list == coor:
-                                    movimiento = self.movimientos_estado[direccion]
-                                    new_pos = (x + movimiento[0], y + movimiento[1])
-
-                                    # Si ya ves tu destino y no hay nada enmedio, ve hacia el
-                                    if self.model.grid.is_cell_empty(new_pos):
-                                        self.funcion = "vista destino (1)"
-                                        self.estado = direccion
-                                        movimiento = self.movimientos_estado[self.estado]
-                                        self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-                                    else:
-                                        # Hay algo entre tu destino y tu, que es?
-                                        cell_future = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
-                                        edifico_agent = [agent for agent in cell_future if isinstance(agent, Edificio)]
-                                        estacionamiento_agents = [agent for agent in cell_future if isinstance(agent, Estacionamiento)]
-                                        # Si es tu destino ve!!!
-                                        if estacionamiento_agents and new_pos == self.destino:
-                                            self.funcion = "vista destino (2)"
-                                            self.estado = direccion
-                                            movimiento = self.movimientos_estado[self.estado]
-                                            self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-                                        # Si es una pared de un edificio mejor sigue caminando
-                                        elif edifico_agent:
-                                            self.funcion = "vista destino (3)"
-                                            movimiento = self.movimientos_estado[self.estado]
-                                            self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-                                        
-                        # Si esta en una celda de giro
-                        elif tuple(pos_list) in lista_giros_coor:
-                            self.funcion = "celda de giro"
-                            self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)    # Cambiamos el estado
-                            movimiento = self.movimientos_estado[self.estado]
-                            self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-                        
-                        # Si esta en una celda de elección
-                        elif tuple(pos_list) in lista_eleccion_coor:
-                            self.funcion = "celda de eleccion"
-                            self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
-                            movimiento = self.movimientos_estado[self.estado]
-                            self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-                        
-                        # Muevete segun tu estado
+            # Si ves tu destino
+            elif tuple(pos_list) in self.destino_vista_coor:
+                for coor, dir in self.destino_ala_vista:
+                    if pos_list == coor:
+                        # MIRA
+                        posible_mov = self.movimientos_estado[dir]
+                        new_pos = (x + posible_mov[0], y + posible_mov[1])
+                        # Revisa que hay delante de ti
+                        cell_future = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
+                        edifico_agent = [agent for agent in cell_future if isinstance(agent, Edificio)]
+                        # Si hay una pared mejor sigue como ibas
+                        if edifico_agent:
+                            self.estado = "vista destino, pared"
+                            moved = self.avanza_con_precaucion()
+                        # Si no, Avanza hacia el destino
                         else:
-                            if self.estado in self.movimientos_estado:
-                                self.funcion = "Avanzando"
-                                movimiento = self.movimientos_estado[self.estado]
-                                self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
-                else:
-                    # Si esta en una celda de giro
-                    if tuple(pos_list) in lista_giros_coor:
-                        self.funcion = "celda de giro"
-                        self.estado = self.girar_sin_opcion(pos_list, lista_giros_traducida)    # Cambiamos el estado
-                        movimiento = self.movimientos_estado[self.estado]
-                    
-                    # Si esta en una celda de elección
-                    elif tuple(pos_list) in lista_eleccion_coor:
-                        self.funcion = "celda de eleccion"
-                        self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
-                        movimiento = self.movimientos_estado[self.estado]
+                            self.estado = "vista destino, llendo"
+                            self.direccion = dir
+                            moved = self.avanza_con_precaucion()
+
+
+            # Si hay un semáforo
+            elif semaforo_agents:
+                for sema in semaforo_agents:
+                    if sema.color == "#FF0200": # Rojo, Alto
+                        self.estado = "En semaforo(rojo)"
+                        self.model.grid.move_agent(self, (x, y))
+                    else:   # Verde, Avanza
+                        self.estado = "En semaforo(verde)"
+                        moved = self.avanza_con_precaucion()
+            # Si hay una vuelta
+            elif tuple(pos_list) in lista_giros_coor:
+                # Gira
+                self.estado = "celda de giro"
+                self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                moved = self.avanza_con_precaucion()
+            # Si hay una decisión
+            elif tuple(pos_list) in lista_eleccion_coor:
+                # Escoge
+                self.estado = "celda de eleccion"
+                self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                moved = self.avanza_con_precaucion()
+            # Si no hay nada de lo anterior, avanza
+            else:
+                moved = self.avanza_con_precaucion()
+                        
 
 class Autobus(Agent):
     def __init__(self, unique_id, model, direccion, paradas, n_parada):
@@ -398,13 +383,21 @@ class CiudadModel(Model):
     def step(self):
         # Hacer avanzar el modelo
         self.schedule.step()
-        self.verificar_autos_llegados()
+        # self.verificar_autos_llegados()   # Descomentar para que el programa termine cuando todos los autos hayan llegado a su destino
+        
+        # Borrar Agentes que ya llegaron a su destino
+        if agente.llego_a_destino:
+            self.remover_agente(agente)
 
     def verificar_autos_llegados(self):
         autos_destino = sum(1 for agent in self.schedule.agents if isinstance(agent, Auto) and agent.destino_bool)
         if autos_destino == self.num_autos:  #Cuando todos los autos lleguen a su destino termina el programa
             self.running = False
             print("Todos los autos han llegado a su destino!!!")
+
+    def remover_agente(self, agente):
+        self.schedule.remove(agente)
+        self.grid.remove_agent(agente)
 
 def agent_portrayal(agent):
     if isinstance(agent, Auto):
