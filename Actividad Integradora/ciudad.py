@@ -191,8 +191,15 @@ class Autobus(Agent):
         self.tiempo_parada = 0
         self.tiempo_max_parada = 10
         self.primer_paso = False
-        self.direccion = ""
+        self.direccion = parada_or[2]
         self.estado = ""
+        
+        self.movimientos_direccion = {
+            "Ar": (0, 1),   # Arriba
+            "Ab": (0, -1),  # Abajo
+            "Iz": (-1, 0),  # Izquierda
+            "De": (1, 0),   # Derecha
+        }
 
     def step(self):
         x, y = self.pos
@@ -204,23 +211,60 @@ class Autobus(Agent):
             if (self.tiempo_parada < tiempo_max_parada):
                 self.estado = "Parada"
                 self.tiempo_parada += 1
-            # Ahora ve a otra parada
+            # Ahora selecciona otra parada 
             else:
-                
+                self.estado = "Eligiendo nueva parada..."
                 # self.parada = # Parada es igual a una nueva parada
         else:
+
             # Si tu siguiente celda no se sale del mapa
+            movimiento = self.movimientos_direccion[self.direccion]
+            new_pos = (x + movimiento[0], y + movimiento[1])
+            if 0 <= new_pos[0] < self.model.grid.width and 0 <= new_pos[1] < self.model.grid.height:
+                
+                # Revisa que hay enfrente
+                cell_future = self.model.grid.get_cell_list_contents([new_pos])
+                auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
+                bus_agent = [agent for agent in cell_future if isinstance(agent, Autobus)]
                 # Si hay alguien adelante, detente
-                # Si hay un semaforo en:
-                    # Rojo, detente
-                    # Verde, sigue
+                if auto_agent or bus_agent:
+                    self.estado = "Vehiculo enfrente"
+                    self.model.grid.move_agent(self, (x, y))
+
+                else:
+                    # Sino, Revisa que hay donde tu estas
+                    cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
+                    semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
+                    # Si hay un semáforo
+                    if semaforo_agents:
+                        for sema in semaforo_agents:
+                            if sema.color == "#FF0200": # Rojo, Alto
+                                self.estado = "En semaforo(rojo)"
+                                self.model.grid.move_agent(self, (x, y))
+                    # Si hay una vuelta, gira
+                    elif tuple(pos_list) in lista_giros_coor:
+                        self.funcion = "celda de giro"
+                        self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                    # Si hay una decisión, escoge
+                    elif tuple(pos_list) in lista_eleccion_coor:
+                        self.funcion = "celda de eleccion"
+                        self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                    # Si no hay nada de lo anterior, avanza
+                    else:
+                        movimiento = self.movimientos_direccion[self.direccion]
+                        self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+            else:
                 # Si hay una vuelta, gira
+                if tuple(pos_list) in lista_giros_coor:
+                    self.funcion = "celda de giro"
+                    self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                 # Si hay una decisión, escoge
-            # Si tu siguiente celda se sale del mapa
-                # Si hay una vuelta, gira
-                # Si hay una decisión, escoge
+                elif tuple(pos_list) in lista_eleccion_coor:
+                    self.funcion = "celda de eleccion"
+                    self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                
+
             
-            avanza_uno(self.direccion) # Crear esta función
             
 
 class Edificio(Agent):
