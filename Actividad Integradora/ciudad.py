@@ -182,9 +182,46 @@ class Auto(Agent):
                         movimiento = self.movimientos_estado[self.estado]
 
 class Autobus(Agent):
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, parada_or):
         super().__init__(unique_id, model)
         self.next_state = None
+        self.unique_id = unique_id
+        self.parada_or = parada_or
+        self.parada = traduccion(self.parada_or[0], self.parada_or[1])
+        self.tiempo_parada = 0
+        self.tiempo_max_parada = 10
+        self.primer_paso = False
+        self.direccion = ""
+        self.estado = ""
+
+    def step(self):
+        x, y = self.pos
+        pos_list = [x,y]
+
+        # Llegaste a una parada
+        if tuple(pos_list) == self.parada:
+            # Espera en la parada
+            if (self.tiempo_parada < tiempo_max_parada):
+                self.estado = "Parada"
+                self.tiempo_parada += 1
+            # Ahora ve a otra parada
+            else:
+                
+                # self.parada = # Parada es igual a una nueva parada
+        else:
+            # Si tu siguiente celda no se sale del mapa
+                # Si hay alguien adelante, detente
+                # Si hay un semaforo en:
+                    # Rojo, detente
+                    # Verde, sigue
+                # Si hay una vuelta, gira
+                # Si hay una decisión, escoge
+            # Si tu siguiente celda se sale del mapa
+                # Si hay una vuelta, gira
+                # Si hay una decisión, escoge
+            
+            avanza_uno(self.direccion) # Crear esta función
+            
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -552,4 +589,3 @@ if __name__ == "__main__":
 
 # Todo 
 # Autobuses
-# Que los coches no traspases a los autobuses
