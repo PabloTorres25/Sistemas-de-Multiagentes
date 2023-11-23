@@ -243,6 +243,8 @@ class Autobus(Agent):
                                 self.model.grid.move_agent(self, (x, y))
                     # Si hay una vuelta, gira
                     elif tuple(pos_list) in lista_giros_coor:
+                        
+                        if
                         self.funcion = "celda de giro"
                         self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                     # Si hay una decisión, escoge
