@@ -10,20 +10,18 @@ import random
 def traduccion(val1, val2):
     return val1 - 1, alto - val2
 
-def trad_2(val1, val2):
-    return val1 +1, alto - val2 
-
 class Auto(Agent):
-    def __init__(self, unique_id, model, destino_or):
+    def __init__(self, unique_id, model, origen,destino_or):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
+        self.origen = origen
         self.destino_or = destino_or
         self.destino = traduccion(self.destino_or[0], self.destino_or[1])   # Traducción de las coordenadas de destino_or
         self.destino_bool = False
         self.primer_paso = False
-        self.estado = ""
-        self.funcion = ""
+        self.direccion = ""
+        self.estado = "Inicio"
         self.pos_trad = (self.pos)
 
         self.destino_ala_vista = (
@@ -38,7 +36,7 @@ class Auto(Agent):
         )
         self.destino_vista_coor = tuple(tupla[0] for tupla in self.destino_ala_vista)
 
-        self.movimientos_estado = {
+        self.movimientos_direccion = {
             "Ar": (0, 1),   # Arriba
             "Ab": (0, -1),  # Abajo
             "Iz": (-1, 0),  # Izquierda
@@ -63,12 +61,11 @@ class Auto(Agent):
     def step(self):
         x, y = self.pos
         pos_list = [x,y]
-        self.pos_trad = (trad_2(x,y))
 
         if tuple(pos_list) == self.destino:
             if (self.destino_bool == False):
                 print(f"LLEGUÉ A MI DESTINO!!!, Auto ID = {self.unique_id}")
-                self.funcion = "Destino"
+                self.estado = "Destino"
                 self.destino_bool = True
         
          # Primero, vemos si esta en un estacionamiento que no sea el de destino       
@@ -648,7 +645,3 @@ if __name__ == "__main__":
                         "list_alto": lista_alto_autobus})
     server.port = 8521 # The default
     server.launch()
-
-
-# Todo 
-# Autobuses
