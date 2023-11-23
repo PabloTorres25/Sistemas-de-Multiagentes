@@ -11,7 +11,7 @@ def traduccion(val1, val2):
     return val1 - 1, alto - val2
 
 class Auto(Agent):
-    def __init__(self, unique_id, model, origen,destino_or):
+    def __init__(self, unique_id, model, origen, destino_or):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
@@ -358,11 +358,11 @@ class CiudadModel(Model):
         # Vehiculos
         ## Autos
         contador_autos = 0
-        for coche in list_esta:
+        for origen_auto in list_esta:
             if contador_autos < self.num_autos:
-                new_destiny = random.choice([e for e in list_esta if e != coche])
-                new_auto = Auto(id_agente, self, new_destiny)
-                self.grid.place_agent(new_auto, (traduccion(coche[0], coche[1])))
+                new_destiny = random.choice([e for e in list_esta if e != origen_auto])
+                new_auto = Auto(id_agente, self, origen_auto, new_destiny)
+                self.grid.place_agent(new_auto, (traduccion(origen_auto[0], origen_auto[1])))
                 self.schedule.add(new_auto)
                 id_agente += 1
                 contador_autos += 1
@@ -478,7 +478,7 @@ def get_auto_info(model):
     info = []
     for agent in model.schedule.agents:
         if isinstance(agent, Auto):
-            info.append(f"Auto ID: {agent.unique_id},  Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Dirección: {agent.estado}, Estado: {agent.funcion}")
+            info.append(f"Auto ID: {agent.unique_id}, Origen: {agent.origen} Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Estado: {agent.estado}")
         elif isinstance(agent, Autobus):
             info.append(f"Autobus ID: {agent.unique_id},  Parada: {agent.indice_parada_actual}, Posición: {agent.pos_trad}, Dirección: {agent.direccion}, Estado: {agent.estado}")
     return info
@@ -614,7 +614,7 @@ if __name__ == "__main__":
     )
 
     # Autos
-    numero_autos = 7        # Maximo 17, uno en cada estacionamiento
+    numero_autos = 1        # Maximo 17, uno en cada estacionamiento
     numero_autobuses = 1    # Maximo 7, uno en cada parada
 
     info_text = AutoInfoText()
