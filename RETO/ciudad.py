@@ -62,21 +62,20 @@ class Auto(Agent):
         x, y = self.pos
         pos_list = [x,y]
 
-        # Llegaste a destino, BORRATE
+        # Llegaste a destino
         if tuple(pos_list) == self.destino:
             if self.destino_bool == False:
                 self.estado = "Destino"
                 self.destino_bool = True
             if self.destino_bool == True:
-                # Borrate
-        
-         # Si no, vemos si esta en un estacionamiento        
-        else:  
+                # BORRATE    
+        else:
+            # Revisa que hay donde tu estas
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
             estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
             semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
             
-            # Si esta en un estacionamiento
+            # Si hay un estacionamiento
             if estacionamiento_agents:
                 for move in self.movimientos_estado.values():
                     new_pos = (x + move[0], y + move[1])
