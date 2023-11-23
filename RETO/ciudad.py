@@ -193,6 +193,7 @@ class Autobus(Agent):
         self.direccion = direccion
         self.estado = "Inicio"
         self.ya_elegi = False
+        self.ya_gire = False
         self.pos_trad = (self.pos)
         
         self.movimientos_direccion = {
@@ -258,21 +259,21 @@ class Autobus(Agent):
                             if sema.color == "#FF0200": # Rojo, Alto
                                 self.estado = "En semaforo(rojo)"
                                 self.model.grid.move_agent(self, (x, y))
-                    # Si hay una vuelta
-                    elif tuple(pos_list) in lista_giros_coor:
+                    # Si hay una vuelta y no has girado
+                    elif tuple(pos_list) in lista_giros_coor and self.ya_gire == False:
                         # Si tu dirección es diferente a la que tiene, gira
                         if self.direccion != self.girar_sin_opcion(pos_list, lista_giros_traducida):
                             self.estado = "celda de giro"
                             self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
-                    # Si hay una decisión
-                    elif tuple(pos_list) in lista_eleccion_coor:
-                        # Si no has decidido, escoge
-                        if self.ya_elegi == False:
-                            self.estado = "celda de eleccion"
-                            self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
-                            self.ya_elegi = True
+                            self.ya_gire = True
+                    # Si hay una decisión y no has decidido
+                    elif tuple(pos_list) in lista_eleccion_coor and self.ya_elegi == False:
+                        self.estado = "celda de eleccion"
+                        self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                        self.ya_elegi = True
                     # Si no hay nada de lo anterior, avanza
                     else:
+                        self.ya_gire = False
                         self.ya_elegi = False
                         self.estado = "Avanzando"
                         movimiento = self.movimientos_direccion[self.direccion]
