@@ -261,7 +261,7 @@ class Autobus(Agent):
             cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
             semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
             # Si hay un semáforo
-            if semaforo_agents and self.semaforo_verde == False:
+            if semaforo_agents:
                 for sema in semaforo_agents:
                     if sema.color == "#FF0200": # Rojo, Alto
                         self.estado = "En semaforo(rojo)"
