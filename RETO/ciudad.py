@@ -607,8 +607,10 @@ if __name__ == "__main__":
     )
 
     # Lista de coordenadas donde el autobus se detendra un momento
-    lista_alto_autobus: Tuple[Tuple[int, int]] = ( 
-        (2,21), (5,2), (9,13), (10,7), (20,16), (21,23), (23,4)
+    lista_alto_autobus: Tuple[Tuple[int, int], str] = ( 
+        ((2,21), "Ab"), ((5,2), "Iz"), ((9,13), "Iz"), 
+        ((10,7), "Iz"), ((20,16), "De"), ((21,23), "De"), 
+        ((23,4), "Ar")
     )
 
     # Autos
