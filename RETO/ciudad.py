@@ -192,6 +192,7 @@ class Autobus(Agent):
         self.tiempo_max_parada = 10
         self.direccion = direccion
         self.estado = "Inicio"
+        self.semaforo_verde = False
         self.ya_elegi = False
         self.ya_gire = False
         self.pos_trad = (self.pos)
@@ -254,11 +255,13 @@ class Autobus(Agent):
                     cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
                     semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
                     # Si hay un semáforo
-                    if semaforo_agents:
+                    if semaforo_agents and self.semaforo_verde == False:
                         for sema in semaforo_agents:
                             if sema.color == "#FF0200": # Rojo, Alto
                                 self.estado = "En semaforo(rojo)"
                                 self.model.grid.move_agent(self, (x, y))
+                            else:
+                                self.semaforo_verde = True
                     # Si hay una vuelta y no has girado
                     elif tuple(pos_list) in lista_giros_coor and self.ya_gire == False:
                         # Si tu dirección es diferente a la que tiene, gira
@@ -620,7 +623,7 @@ if __name__ == "__main__":
     # Autobuses
     # Lista de paradas que saldran en el Mapa
     lista_paradas: Tuple[Tuple[int, int]] = ( 
-        (3,21), (5,3), (9,12), (10,6), (20,17), (21,22), (23,4)
+        (3,21), (5,3), (9,12), (10,6), (20,17), (21,22), (22,4)
     )
 
     # Lista de coordenadas donde el autobus se detendra un momento
