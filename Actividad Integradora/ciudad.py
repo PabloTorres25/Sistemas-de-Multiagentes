@@ -98,10 +98,11 @@ class Auto(Agent):
                 if 0 <= new_pos[0] < self.model.grid.width and 0 <= new_pos[1] < self.model.grid.height:
                     cell_future = self.model.grid.get_cell_list_contents([new_pos])
                     auto_agent = [agent for agent in cell_future if isinstance(agent, Auto)]
+                    bus_agent = [agent for agent in cell_future if isinstance(agent, Autobus)]
 
-                    # si encuentra otro coche, Alto
-                    if auto_agent:
-                        self.funcion = "Auto enfrente"
+                    # si encuentra otro vehiculo, Alto
+                    if auto_agent or bus_agent:
+                        self.funcion = "Vehiculo enfrente"
                         self.model.grid.move_agent(self, (x, y))
                     
                     # Si encuentra un semaforo
