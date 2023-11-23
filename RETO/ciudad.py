@@ -187,11 +187,11 @@ class Autobus(Agent):
         self.next_state = None
         self.unique_id = unique_id
         self.parada_or = parada_or
-        self.parada = traduccion(self.parada_or[0], self.parada_or[1])
+        self.parada = traduccion(self.parada_or[0][0], self.parada_or[0][1])
         self.tiempo_parada = 0
         self.tiempo_max_parada = 10
         self.primer_paso = False
-        self.direccion = parada_or[2]
+        self.direccion = parada_or[1]
         self.estado = ""
         self.ya_elegi = False
         
@@ -284,10 +284,6 @@ class Autobus(Agent):
                 elif tuple(pos_list) in lista_eleccion_coor:
                     self.funcion = "celda de eleccion"
                     self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
-                
-
-            
-            
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -384,7 +380,6 @@ class CiudadModel(Model):
         # Vehiculos
         ## Autos
         contador_autos = 0
-        destinos_disponibles = list(list_esta)
         for coche in list_esta:
             if contador_autos < self.num_autos:
                 new_destiny = random.choice([e for e in list_esta if e != coche])
@@ -396,19 +391,13 @@ class CiudadModel(Model):
             else:
                 break
         ## Autobuses
-        contador_autobus = 0
-        paradas_disponibles = list(list_alto)
-        for bus in list_alto:
-            if contador_autobus < self.num_buses:
-                new_alto = random.choice([e for e in list_alto if e != bus])
-                #new_bus = Autobus(id_agente, self, new_alto)
-                new_bus = Autobus(id_agente, self)
-                self.grid.place_agent(new_bus, (traduccion(bus[0], bus[1])))
+        paradas = [parada[0] for parada in list_alto]
+        for bus in range(self.num_buses):
+                parada_autobus = paradas[i % len(paradas)]
+                new_bus = Autobus(id_agente, self, parada_autobus)
+                self.grid.place_agent(new_bus, (traduccion(parada_autobus[0], parada_autobus[1])))
                 self.schedule.add(new_bus)
                 id_agente += 1
-                contador_autobus += 1
-            else:
-                break
 
     def step(self):
         # Hacer avanzar el modelo
@@ -634,7 +623,7 @@ if __name__ == "__main__":
     )
 
     # Autos
-    numero_autos = 5        # Maximo 17, uno en cada estacionamiento
+    numero_autos = 0        # Maximo 17, uno en cada estacionamiento
     numero_autobuses = 1    # Maximo 7, uno en cada parada
 
     info_text = AutoInfoText()
