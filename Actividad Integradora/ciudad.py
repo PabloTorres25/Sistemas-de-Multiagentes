@@ -200,6 +200,11 @@ class Glorieta(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
 
+class Parada(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.next_state = None
+
 class Semaforo(Agent):
     def __init__(self, unique_id, model, orientacion):
         super().__init__(unique_id, model)
@@ -220,11 +225,12 @@ class Semaforo(Agent):
                 self.color = "#00B050"
 
 class CiudadModel(Model):
-    def __init__(self, width, height, num_autos, list_edif, list_esta, list_glor, list_sem):
+    def __init__(self, width, height, num_autos, list_edif, list_esta, list_glor, list_sem, num_buses,list_par, list_alto):
         self.grid = MultiGrid(width, height, False)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
         self.num_autos = num_autos
+        self.num_buses = num_buses
         id_agente = 0
         self.autos_destino = 0 
 
@@ -264,7 +270,15 @@ class CiudadModel(Model):
             self.schedule.add(new_estacionamiento)
             id_agente += 1
         
-        # Autos
+        ## Paradas
+        for parada in list_par:
+            new_parada = Parada(id_agente, self)
+            self.grid.place_agent(new_parada, (traduccion(parada[0], parada[1])))
+            self.schedule.add(new_parada)
+            id_agente += 1
+        
+        # Vehiculos
+        ## Autos
         contador_autos = 0
         destinos_disponibles = list(list_esta)
         for coche in list_esta:
@@ -275,6 +289,20 @@ class CiudadModel(Model):
                 self.schedule.add(new_auto)
                 id_agente += 1
                 contador_autos += 1
+            else:
+                break
+        ## Autobuses
+        contador_autobus = 0
+        paradas_disponibles = list(list_alto)
+        for bus in list_alto:
+            if contador_autobus < self.num_buses:
+                new_alto = random.choice([e for e in list_alto if e != bus])
+                #new_bus = Autobus(id_agente, self, new_alto)
+                new_bus = Autobus(id_agente, self)
+                self.grid.place_agent(new_bus, (traduccion(bus[0], bus[1])))
+                self.schedule.add(new_bus)
+                id_agente += 1
+                contador_autobus += 1
             else:
                 break
 
@@ -302,7 +330,7 @@ def agent_portrayal(agent):
         portrayal = {"Shape": "circle",
                         "Filled": "true",
                         "Layer": 1,
-                        "Color": "orange",
+                        "Color": "Orange",
                         "r": 0.8,
                         "text": agent.unique_id
                         }
@@ -347,6 +375,14 @@ def agent_portrayal(agent):
                         "w": 1,
                         "h": 1
                         }
+    elif isinstance(agent, Parada):
+        portrayal = {"Shape": "rect",
+                    "Filled": "true",
+                    "Layer": 0,
+                    "Color": "#FFC90E",
+                    "w": 1,
+                    "h": 1
+                    }
     else:
         portrayal = {"Shape": "rect",
                     "Filled": "true",
@@ -492,7 +528,8 @@ if __name__ == "__main__":
     )
 
     # Autos
-    numero_autos = 5    # Maximo 17, uno en cada estacionamiento
+    numero_autos = 5        # Maximo 17, uno en cada estacionamiento
+    numero_autobuses = 1    # Maximo 7, uno en cada parada
 
     info_text = AutoInfoText()
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
@@ -504,10 +541,14 @@ if __name__ == "__main__":
                         "list_edif": lista_edificios,
                         "list_esta": lista_estacionamientos,
                         "list_glor": lista_glorietas,
-                        "list_sem": lista_semaforos})
+                        "list_sem": lista_semaforos,
+                        "num_buses": numero_autobuses,
+                        "list_par": lista_paradas,
+                        "list_alto": lista_alto_autobus})
     server.port = 8521 # The default
     server.launch()
 
 
 # Todo 
 # Autobuses
+# Que los coches no traspases a los autobuses
