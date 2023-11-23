@@ -186,13 +186,14 @@ class Autobus(Agent):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
-        self.lista_paradas = paradas
+        self.paradas = paradas
         self.indice_parada_actual = n_parada
         self.tiempo_parada = 0
         self.tiempo_max_parada = 10
         self.direccion = direccion
-        self.estado = ""
+        self.estado = "Inicio"
         self.ya_elegi = False
+        self.pos_trad = (self.pos)
         
         self.movimientos_direccion = {
             "Ar": (0, 1),   # Arriba
@@ -261,29 +262,30 @@ class Autobus(Agent):
                     elif tuple(pos_list) in lista_giros_coor:
                         # Si tu dirección es diferente a la que tiene, gira
                         if self.direccion != self.girar_sin_opcion(pos_list, lista_giros_traducida):
-                            self.funcion = "celda de giro"
+                            self.estado = "celda de giro"
                             self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                     # Si hay una decisión
                     elif tuple(pos_list) in lista_eleccion_coor:
                         # Si no has decidido, escoge
                         if self.ya_elegi == False:
-                            self.funcion = "celda de eleccion"
-                            self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                            self.estado = "celda de eleccion"
+                            self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                             self.ya_elegi = True
                     # Si no hay nada de lo anterior, avanza
                     else:
                         self.ya_elegi = False
+                        self.estado = "Avanzando"
                         movimiento = self.movimientos_direccion[self.direccion]
                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
             else:
                 # Si hay una vuelta, gira
                 if tuple(pos_list) in lista_giros_coor:
-                    self.funcion = "celda de giro"
+                    self.estado = "celda de giro"
                     self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                 # Si hay una decisión, escoge
                 elif tuple(pos_list) in lista_eleccion_coor:
-                    self.funcion = "celda de eleccion"
-                    self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                    self.estado = "celda de eleccion"
+                    self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -392,7 +394,7 @@ class CiudadModel(Model):
                 break
         ## Autobuses
         paradas = [parada[0] for parada in list_alto]
-        direcciones = [parada[1] for direccion in list_alto]
+        direcciones = [direccion[1] for direccion in list_alto]
         for bus in range(self.num_buses):
                 numero_parada = i % len(paradas)    # En que indice de parada nacera
                 parada_autobus = paradas[numero_parada]
@@ -489,11 +491,13 @@ def agent_portrayal(agent):
     return portrayal
 
 def get_auto_info(model):
-    auto_info = []
+    info = []
     for agent in model.schedule.agents:
         if isinstance(agent, Auto):
-            auto_info.append(f"Auto ID: {agent.unique_id},  Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Dirección: {agent.estado}, Estado: {agent.funcion}")
-    return auto_info
+            info.append(f"Auto ID: {agent.unique_id},  Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Dirección: {agent.estado}, Estado: {agent.funcion}")
+        elif isinstance(agent, Autobus):
+            info.append(f"Autobus ID: {agent.unique_id},  Parada: {agent.indice_parada_actual}, Posición: {agent.pos_trad}, Dirección: {agent.direccion}, Estado: {agent.estado}")
+    return info
 
 class AutoInfoText(TextElement):
     def __init__(self):
