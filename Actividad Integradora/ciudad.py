@@ -299,12 +299,11 @@ def agent_portrayal(agent):
                         "text": agent.unique_id
                         }
     elif isinstance(agent, Autobus):
-        portrayal = {"Shape": "rect",
+        portrayal = {"Shape": "circle",
                         "Filled": "true",
                         "Layer": 1,
-                        "Color": "black",
-                        "w": 1.6,  
-                        "h": 1.6,
+                        "Color": "orange",
+                        "r": 0.8,
                         "text": agent.unique_id
                         }
     elif isinstance(agent, Edificio):
@@ -480,6 +479,17 @@ if __name__ == "__main__":
     )
     lista_eleccion_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_eleccion) # La traducimos segun como Mesa la crea
     lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
+
+    # Autobuses
+    # Lista de paradas que saldran en el Mapa
+    lista_paradas: Tuple[Tuple[int, int]] = ( 
+        (3,21), (5,3), (9,12), (10,6), (20,17), (21,22), (23,4)
+    )
+
+    # Lista de coordenadas donde el autobus se detendra un momento
+    lista_alto_autobus: Tuple[Tuple[int, int]] = ( 
+        (2,21), (5,2), (9,13), (10,7), (20,16), (21,23), (23,4)
+    )
 
     # Autos
     numero_autos = 5    # Maximo 17, uno en cada estacionamiento
