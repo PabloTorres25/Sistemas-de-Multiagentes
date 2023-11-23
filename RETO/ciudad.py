@@ -182,16 +182,16 @@ class Auto(Agent):
                         movimiento = self.movimientos_estado[self.estado]
 
 class Autobus(Agent):
-    def __init__(self, unique_id, model, parada_or):
+    def __init__(self, unique_id, model, parada_or, direccion):
         super().__init__(unique_id, model)
         self.next_state = None
         self.unique_id = unique_id
         self.parada_or = parada_or
-        self.parada = traduccion(self.parada_or[0][0], self.parada_or[0][1])
+        self.parada = traduccion(self.parada_or[0], self.parada_or[1])
         self.tiempo_parada = 0
         self.tiempo_max_parada = 10
         self.primer_paso = False
-        self.direccion = parada_or[1]
+        self.direccion = direccion
         self.estado = ""
         self.ya_elegi = False
         
@@ -224,15 +224,14 @@ class Autobus(Agent):
         # Llegaste a una parada
         if tuple(pos_list) == self.parada:
             # Espera en la parada
-            if (self.tiempo_parada < tiempo_max_parada):
+            if self.tiempo_parada < self.tiempo_max_parada:
                 self.estado = "Parada"
                 self.tiempo_parada += 1
             # Ahora selecciona otra parada 
             else:
                 self.estado = "Eligiendo nueva parada..."
-                # self.parada = # Parada es igual a una nueva parada
+                self.parada = # Parada es igual a una nueva parada
         else:
-
             # Si tu siguiente celda no se sale del mapa
             movimiento = self.movimientos_direccion[self.direccion]
             new_pos = (x + movimiento[0], y + movimiento[1])
@@ -392,9 +391,11 @@ class CiudadModel(Model):
                 break
         ## Autobuses
         paradas = [parada[0] for parada in list_alto]
+        direcciones = [parada[1] for direccion in list_alto]
         for bus in range(self.num_buses):
                 parada_autobus = paradas[i % len(paradas)]
-                new_bus = Autobus(id_agente, self, parada_autobus)
+                direccion_autobus = direcciones[i]
+                new_bus = Autobus(id_agente, self, parada_autobus, direccion_autobus)
                 self.grid.place_agent(new_bus, (traduccion(parada_autobus[0], parada_autobus[1])))
                 self.schedule.add(new_bus)
                 id_agente += 1
@@ -623,7 +624,7 @@ if __name__ == "__main__":
     )
 
     # Autos
-    numero_autos = 0        # Maximo 17, uno en cada estacionamiento
+    numero_autos = 1        # Maximo 17, uno en cada estacionamiento
     numero_autobuses = 1    # Maximo 7, uno en cada parada
 
     info_text = AutoInfoText()
