@@ -46,6 +46,8 @@ class Auto(Agent):
 
     def girar_sin_opcion(self, pos_list, lista_celdas):
         pos_list = tuple(pos_list)
+        print("pos_list = ", pos_list)
+        print("lista_celdas = ", lista_celdas)
         for coor, direccion in lista_celdas:
             if pos_list == coor:
                 return direccion # Se queda quieto un segundo, para simular que gira (Aunque no se vea)
@@ -108,15 +110,18 @@ class Auto(Agent):
                     if self.model.grid.is_cell_empty(new_pos):
                         self.estado = "Saliendo Estacionamiento"
                         self.model.grid.move_agent(self, new_pos)   # SAL
+                        pos_list = (pos_list[0] + move[0], pos_list[1] + move[1])
                         self.direccion = self.girar_sin_opcion(pos_list, lista_primeros_traducida) # Toma una dirección
+                        print("Dirección = ", self.direccion)
                         break
 
             # Si ves tu destino
             elif tuple(pos_list) in self.destino_vista_coor:
+                pos_list = tuple(pos_list)
                 for coor, dir in self.destino_ala_vista:
                     if pos_list == coor:
                         # MIRA
-                        posible_mov = self.movimientos_estado[dir]
+                        posible_mov = self.movimientos_direccion[dir]
                         new_pos = (x + posible_mov[0], y + posible_mov[1])
                         # Revisa que hay delante de ti
                         cell_future = self.model.grid.get_cell_list_contents([(new_pos[0], new_pos[1])])
