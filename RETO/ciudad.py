@@ -46,8 +46,6 @@ class Auto(Agent):
 
     def girar_sin_opcion(self, pos_list, lista_celdas):
         pos_list = tuple(pos_list)
-        print("pos_list = ", pos_list)
-        print("lista_celdas = ", lista_celdas)
         for coor, direccion in lista_celdas:
             if pos_list == coor:
                 return direccion # Se queda quieto un segundo, para simular que gira (Aunque no se vea)
