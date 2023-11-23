@@ -232,7 +232,8 @@ class Autobus(Agent):
                 self.estado = "Vehiculo enfrente"
                 return False
             else:
-
+                # AVANZA
+                self.estado = "Avanzando"
                 self.model.grid.move_agent(self, new_pos)
                 return True
         else:
@@ -267,26 +268,23 @@ class Autobus(Agent):
                         self.model.grid.move_agent(self, (x, y))
                     else:   # Verde, Avanza
                         self.estado = "En semaforo(verde)"
-                        avanza_con_precaucion()
+                        moved = self.avanza_con_precaucion()
 
             # Si hay una vuelta
             elif tuple(pos_list) in lista_giros_coor:
                 # Gira
                 self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                 self.estado = "celda de giro"
-                avanza_con_precaucion()
+                moved = self.avanza_con_precaucion()
             # Si hay una decisión
             elif tuple(pos_list) in lista_eleccion_coor:
                 # Escoge
                 self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                 self.estado = "celda de eleccion"
-                avanza_con_precaucion()
+                moved = self.avanza_con_precaucion()
             # Si no hay nada de lo anterior, avanza
             else:
-                avanza_con_precaucion()
-                self.estado = "Avanzando"
-                movimiento = self.movimientos_direccion[self.direccion]
-                self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
+                moved = self.avanza_con_precaucion()
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -632,7 +630,7 @@ if __name__ == "__main__":
 
     # Autos
     numero_autos = 7        # Maximo 17, uno en cada estacionamiento
-    numero_autobuses = 0    # Maximo 7, uno en cada parada
+    numero_autobuses = 1    # Maximo 7, uno en cada parada
 
     info_text = AutoInfoText()
     grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
