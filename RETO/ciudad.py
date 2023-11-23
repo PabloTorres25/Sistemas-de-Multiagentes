@@ -62,16 +62,18 @@ class Auto(Agent):
         x, y = self.pos
         pos_list = [x,y]
 
+        # Llegaste a destino, BORRATE
         if tuple(pos_list) == self.destino:
-            if (self.destino_bool == False):
-                print(f"LLEGUÉ A MI DESTINO!!!, Auto ID = {self.unique_id}")
+            if self.destino_bool == False:
                 self.estado = "Destino"
                 self.destino_bool = True
+            if self.destino_bool == True:
+                # Borrate
         
-         # Primero, vemos si esta en un estacionamiento que no sea el de destino       
+         # Si no, vemos si esta en un estacionamiento        
         else:  
-            cell_contents = self.model.grid.get_cell_list_contents([(x, y)])    # Revisa que hay en su celda
-            estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]  # Revisa si hay un estacionamiento en su celda
+            cell_contents = self.model.grid.get_cell_list_contents([(x, y)])
+            estacionamiento_agents = [agent for agent in cell_contents if isinstance(agent, Estacionamiento)]
             semaforo_agents = [agent for agent in cell_contents if isinstance(agent, Semaforo)]
             
             # Si esta en un estacionamiento
@@ -79,16 +81,10 @@ class Auto(Agent):
                 for move in self.movimientos_estado.values():
                     new_pos = (x + move[0], y + move[1])
                     if self.model.grid.is_cell_empty(new_pos):
-                        self.model.grid.move_agent(self, new_pos)
-                        self.funcion = "Estacionamiento"
+                        self.funcion = "Saliendo Estacionamiento"
+                        self.model.grid.move_agent(self, new_pos)   # SAL
+                        self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida) # Toma una dirección
                         break
-
-            # Si ya salio del estacionamiento, da su primer paso
-            elif self.primer_paso == False:
-                self.estado = self.girar_sin_opcion(pos_list, lista_primeros_traducida)
-                self.funcion = "Primer Paso"
-                self.primer_paso = True
-            
             else:
                 movimiento = self.movimientos_estado[self.estado]
                 new_pos = (x + movimiento[0], y + movimiento[1])
@@ -250,8 +246,8 @@ class Autobus(Agent):
                 self.tiempo_parada += 1
             # Ahora selecciona otra parada 
             else:
-                self.indice_parada_actual = (self.indice_parada_actual + 1) % len(self.paradas)
                 self.estado = "Eligiendo nueva parada..."
+                self.indice_parada_actual = (self.indice_parada_actual + 1) % len(self.paradas)
                 self.tiempo_parada = 0
         else:
             # Sino, Revisa que hay donde tu estas
@@ -270,14 +266,14 @@ class Autobus(Agent):
             # Si hay una vuelta
             elif tuple(pos_list) in lista_giros_coor:
                 # Gira
-                self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                 self.estado = "celda de giro"
+                self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
                 moved = self.avanza_con_precaucion()
             # Si hay una decisión
             elif tuple(pos_list) in lista_eleccion_coor:
                 # Escoge
-                self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                 self.estado = "celda de eleccion"
+                self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
                 moved = self.avanza_con_precaucion()
             # Si no hay nada de lo anterior, avanza
             else:
