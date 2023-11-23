@@ -193,6 +193,7 @@ class Autobus(Agent):
         self.primer_paso = False
         self.direccion = parada_or[2]
         self.estado = ""
+        self.ya_elegi = False
         
         self.movimientos_direccion = {
             "Ar": (0, 1),   # Arriba
@@ -200,6 +201,21 @@ class Autobus(Agent):
             "Iz": (-1, 0),  # Izquierda
             "De": (1, 0),   # Derecha
         }
+
+    def girar_sin_opcion(self, pos_list, lista_celdas):
+        pos_list = tuple(pos_list)
+        for coor, direccion in lista_celdas:
+            if pos_list == coor:
+                return direccion
+        return None
+    
+    def girar_con_opciones(self, pos_list, lista_celdas):
+        pos_list = tuple(pos_list)
+        for coor, dir in lista_celdas:
+            if pos_list == coor:
+                direccion = random.choice(dir)
+                return direccion 
+        return None 
 
     def step(self):
         x, y = self.pos
@@ -241,18 +257,22 @@ class Autobus(Agent):
                             if sema.color == "#FF0200": # Rojo, Alto
                                 self.estado = "En semaforo(rojo)"
                                 self.model.grid.move_agent(self, (x, y))
-                    # Si hay una vuelta, gira
+                    # Si hay una vuelta
                     elif tuple(pos_list) in lista_giros_coor:
-                        
-                        if
-                        self.funcion = "celda de giro"
-                        self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
-                    # Si hay una decisión, escoge
+                        # Si tu dirección es diferente a la que tiene, gira
+                        if self.direccion != self.girar_sin_opcion(pos_list, lista_giros_traducida):
+                            self.funcion = "celda de giro"
+                            self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                    # Si hay una decisión
                     elif tuple(pos_list) in lista_eleccion_coor:
-                        self.funcion = "celda de eleccion"
-                        self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                        # Si no has decidido, escoge
+                        if self.ya_elegi == False:
+                            self.funcion = "celda de eleccion"
+                            self.estado = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                            self.ya_elegi = True
                     # Si no hay nada de lo anterior, avanza
                     else:
+                        self.ya_elegi = False
                         movimiento = self.movimientos_direccion[self.direccion]
                         self.model.grid.move_agent(self, (x + movimiento[0], y + movimiento[1]))
             else:
