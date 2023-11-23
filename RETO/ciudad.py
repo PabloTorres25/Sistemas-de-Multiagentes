@@ -232,13 +232,12 @@ class Autobus(Agent):
                 self.estado = "Vehiculo enfrente"
                 return False
             else:
-                
+
                 self.model.grid.move_agent(self, new_pos)
                 return True
         else:
             # El siguiente paso se sale del mapa
-            return False 
-                self.model.grid.move_agent(self, (x, y))
+            return False
 
     def step(self):
         x, y = self.pos
