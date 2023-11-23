@@ -134,7 +134,6 @@ class Auto(Agent):
                             self.direccion = dir
                             moved = self.avanza_con_precaucion()
 
-
             # Si hay un semáforo
             elif semaforo_agents:
                 for sema in semaforo_agents:
