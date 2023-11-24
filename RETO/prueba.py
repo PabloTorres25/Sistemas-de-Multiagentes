@@ -1,19 +1,4 @@
-# from flask import Flask, redirect, url_for, request
-# app = Flask(__name__)
-# # http://192.168.0.1//tc2008b?name=silvana
-# # Punto de acceso 'tc2008b'
-# @app.route('/tc2008b', methods=['GET', 'POST'])
-
-# def tc2008b():
-#     if request.method == 'POST':
-#         return 'please use GET'
-#     else:
-#         user = request.args.get('name')
-#         return 'welcome %s' % user
-
-# if __name__ == '__main__':
-#     app.run(debug = True)
-
+from flask import Flask, redirect, url_for, request
 from mesa import Agent, Model 
 from mesa.space import MultiGrid
 from mesa.time import SimultaneousActivation
@@ -22,15 +7,36 @@ from mesa.visualization.ModularVisualization import ModularServer
 from typing import Tuple, Any
 import numpy as np
 import random
+import json
 from ciudad import CiudadModel, agent_portrayal, AutoInfoText
 
+#  10.48.80.154
+app = Flask(__name__)
+@app.route('/informacionAgente', methods=['GET', 'POST'])
 
+def informacionAgente():
+    if request.method == 'POST':
+        numPos = request.post['count']
+        model.step()
+        return 'algo'
+    elif request.method == 'GET':
+        return 'Please use POST'
 
 if __name__ == "__main__":
-    info_text = AutoInfoText()
-    grid = CanvasGrid(agent_portrayal, 24, 24, 720, 720)
-    server = ModularServer(CiudadModel,
-                        [grid, info_text],
-                        "Ciudad Model")
-    server.port = 8521 # The default
-    server.launch()
+    modelo = CiudadModel()
+    
+    # modelo.step()
+    # modelo.step()
+    # positions = modelo.posicionesAgentesCoche()
+    # print(positions)
+
+    app.run(debug = True)
+
+
+    # info_text = AutoInfoText()
+    # grid = CanvasGrid(agent_portrayal, 24, 24, 720, 720)
+    # server = ModularServer(CiudadModel,
+    #                     [grid, info_text],
+    #                     "Ciudad Model")
+    # server.port = 8521 # The default
+    # server.launch()

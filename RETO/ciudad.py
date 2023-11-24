@@ -26,7 +26,6 @@ class Auto(Agent):
         self.direccion = ""
         self.estado = "Inicio"
         self.position = origen
-        print("Acabo de nacer y mi posición es ", self.position)
         self.llego_a_destino = False
 
         self.destino_ala_vista = (
