@@ -65,6 +65,7 @@ class Auto(Agent):
     
     def avanza_con_precaucion(self):
         x, y = self.pos
+        pos_list2 = [x,y]
         movimiento = self.movimientos_direccion[self.direccion] # Avanza uno en la dirección del agente
         new_pos = (x + movimiento[0], y + movimiento[1])
         # Si tu siguiente celda no se sale del mapa
@@ -82,6 +83,8 @@ class Auto(Agent):
                 # AVANZA
                 self.estado = "Avanzando"
                 self.model.grid.move_agent(self, new_pos)
+                pos_list2 = (pos_list2[0] + movimiento[0], pos_list2[1] + movimiento[1])
+                self.position = traduccion2(pos_list2[0], pos_list2[1])
                 return True
         else:
             # El siguiente paso se sale del mapa
@@ -114,6 +117,7 @@ class Auto(Agent):
                         self.estado = "Saliendo Estacionamiento"
                         self.model.grid.move_agent(self, new_pos)   # SAL
                         pos_list = (pos_list[0] + move[0], pos_list[1] + move[1])
+                        self.position = traduccion2(pos_list[0], pos_list[1])
                         self.direccion = self.girar_sin_opcion(pos_list, self.model.list_primeros_traducida) # Toma una dirección
                         break
 
@@ -665,7 +669,7 @@ class AutoInfoText(TextElement):
     def render(self, model):
         info = get_auto_info(model)
         info_html = ''.join([f'<div>{line}</div> <div>&nbsp;</div>' for line in info])
-        return f'<div style="position: absolute; top: 70px; left: 10px; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{info_html}</div>'
+        return f'<div style="position: absolute; top: 70px; left: 10px; max-width: 350px; overflow: hidden; text-overflow: ellipsis;">{info_html}</div>'
 
 if __name__ == "__main__":
     info_text = AutoInfoText()
