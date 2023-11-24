@@ -32,7 +32,6 @@ if __name__ == "__main__":
 
     app.run(debug = True)
 
-
     # info_text = AutoInfoText()
     # grid = CanvasGrid(agent_portrayal, 24, 24, 720, 720)
     # server = ModularServer(CiudadModel,
