@@ -8,7 +8,10 @@ import numpy as np
 import random
 
 def traduccion(val1, val2):
-    return val1 - 1, alto - val2
+        return val1 - 1, 24 - val2
+
+def traduccion2(val1, val2):
+        return val1 + 1, 24 - val2
 
 class Auto(Agent):
     def __init__(self, unique_id, model, origen, destino_or):
@@ -22,7 +25,7 @@ class Auto(Agent):
         self.primer_paso = False
         self.direccion = ""
         self.estado = "Inicio"
-        self.pos_trad = (self.pos)
+        self.position = origen
         self.llego_a_destino = False
 
         self.destino_ala_vista = (
@@ -78,10 +81,12 @@ class Auto(Agent):
                 # AVANZA
                 self.estado = "Avanzando"
                 self.model.grid.move_agent(self, new_pos)
+                self.position = (self.position[0] + movimiento[0], self.position[1] + movimiento[1])
                 return True
         else:
             # El siguiente paso se sale del mapa
             return False
+        
 
     def step(self):
         x, y = self.pos
@@ -109,8 +114,7 @@ class Auto(Agent):
                         self.estado = "Saliendo Estacionamiento"
                         self.model.grid.move_agent(self, new_pos)   # SAL
                         pos_list = (pos_list[0] + move[0], pos_list[1] + move[1])
-                        self.direccion = self.girar_sin_opcion(pos_list, lista_primeros_traducida) # Toma una dirección
-                        print("Dirección = ", self.direccion)
+                        self.direccion = self.girar_sin_opcion(pos_list, self.model.list_primeros_traducida) # Toma una dirección
                         break
 
             # Si ves tu destino
@@ -144,16 +148,16 @@ class Auto(Agent):
                         self.estado = "En semaforo(verde)"
                         moved = self.avanza_con_precaucion()
             # Si hay una vuelta
-            elif tuple(pos_list) in lista_giros_coor:
+            elif tuple(pos_list) in self.model.list_giros_coor:
                 # Gira
                 self.estado = "celda de giro"
-                self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
                 moved = self.avanza_con_precaucion()
             # Si hay una decisión
-            elif tuple(pos_list) in lista_eleccion_coor:
+            elif tuple(pos_list) in self.model.list_eleccion_coor:
                 # Escoge
                 self.estado = "celda de eleccion"
-                self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
                 moved = self.avanza_con_precaucion()
             # Si no hay nada de lo anterior, avanza
             else:
@@ -250,16 +254,16 @@ class Autobus(Agent):
                         moved = self.avanza_con_precaucion()
 
             # Si hay una vuelta
-            elif tuple(pos_list) in lista_giros_coor:
+            elif tuple(pos_list) in self.model.list_giros_coor:
                 # Gira
                 self.estado = "celda de giro"
-                self.direccion = self.girar_sin_opcion(pos_list, lista_giros_traducida)
+                self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
                 moved = self.avanza_con_precaucion()
             # Si hay una decisión
-            elif tuple(pos_list) in lista_eleccion_coor:
+            elif tuple(pos_list) in self.model.list_eleccion_coor:
                 # Escoge
                 self.estado = "celda de eleccion"
-                self.direccion = self.girar_con_opciones(pos_list, lista_eleccion_traducida)
+                self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
                 moved = self.avanza_con_precaucion()
             # Si no hay nada de lo anterior, avanza
             else:
@@ -271,6 +275,11 @@ class Edificio(Agent):
         self.next_state = None
 
 class Estacionamiento(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.next_state = None
+
+class Entrada(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.next_state = None
@@ -305,19 +314,167 @@ class Semaforo(Agent):
                 self.color = "#00B050"
 
 class CiudadModel(Model):
-    def __init__(self, width, height, num_autos, list_edif, list_esta, list_glor, list_sem, num_buses,list_par, list_alto):
-        self.grid = MultiGrid(width, height, False)
+    def __init__(self):
+        # Medidas
+        ancho = 24
+        alto = 24
+        # Autos
+        numero_autos = 1        # Maximo 17, uno en cada estacionamiento
+        numero_autobuses = 1    # Maximo 7, uno en cada parada
+
+        # Mapa
+        lista_edificios: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
+            ((3,3),(12,6)),
+            ((17,3),(18,6)),
+            ((21,3),(22,6)), 
+            
+            ((3,9),(5,12)),
+            ((8,9),(12,12)),
+            ((17,9),(18,12)),
+            ((21,9),(22,12)),
+
+            ((3,17),(6,22)),
+            ((9,17),(12,22)),
+            ((17,17),(22,18)),
+            ((17,21),(22,22))
+        )
+
+        lista_entradas: Tuple[Tuple[int, int]] = ( 
+            (9,3), (3,4), (18,4), (12,4), (21,4), (6,6),
+            (10,9), (22,11), (5,11), (12,10), (17,11),
+            (3,18), (19,18), (21,18), (6,20), (9,20), (21,21)
+        )
+
+        lista_estacionamientos: Tuple[Tuple[int, int]] = ( 
+            (8,3), (3,5), (18,5), (12,5), (21,5), (5,6),
+            (9,9), (22,10), (5,10), (12,11), (17,10),
+            (3,19), (18,18), (20,18), (6,21), (9,21), (20,21)
+        )
+
+        lista_glorietas: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
+            ((14,14),(15,14),(14,15),(15,15)))
+
+        lista_semaforos: Tuple[Tuple[Tuple[int, int], str]] = (
+            ((17,1), "V"), ((17,2), "V"), ((15,3), "H"), ((16,3), "H"), ((8,7), "V"), ((8,8), "V"),
+            ((6,9), "H"), ((7,9), "H"), ((1,12), "H"), ((2,12), "H"), ((3,13), "V"), ((3,14), "V"),
+            ((22,15), "V"), ((22,16), "V"), ((23,17), "H"), ((24,17), "H"), 
+            ((15,21), "H"), ((16,21), "H"), ((13,22), "H"), ((14,22), "H"), ((12,23), "V"), ((12,24), "V")
+        )
+
+        # Autobuses
+        # Lista de paradas que saldran en el Mapa
+        lista_paradas: Tuple[Tuple[int, int]] = ( 
+            (3,21), (5,3), (9,12), (10,6), (20,17), (21,22), (22,4)
+        )
+
+        # Lista de coordenadas donde el autobus se detendra un momento
+        lista_alto_autobus: Tuple[Tuple[int, int], str] = ( 
+            ((2,21), "Ab"), ((5,2), "Iz"), ((9,13), "Iz"), 
+            ((10,7), "Iz"), ((20,16), "De"), ((21,23), "De"), 
+            ((23,4), "Ar")
+        )
+
+        # Coordenadas especiales
+        lista_primeros_pasos: Tuple[Tuple[int, int], str] = (
+            ((8,2),"Iz"), ((2,5),"Ab"), ((19,5),"Ab"), ((13,5),"Ab"),
+            ((20,5),"Ab"),((5,7),"Iz"),
+
+            ((9,8),"Iz"), ((23,10),"Ar"), ((6,10),"Ar"), ((13,11),"Ab"),
+            ((16,10),"Ar"), 
+
+            ((2,19),"Ab"), ((18,19),"Iz"), ((20,19),"Iz"), ((7,21),"Ab"),
+            ((8,21),"Ab"), ((20,20),"Iz")
+        )
+        lista_primeros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_primeros_pasos)
+
+        lista_celdas_giro: Tuple[Tuple[int, int], str] = (
+            ((1,1),"Ab"), ((2,2),"Ab"),
+            ((1,7),"Ab"), ((2,8),"Ab"),
+            ((1,24),"De"), ((2,23),"De"),
+
+            ((7,24),"De"), ((8,23),"De"),
+            ((23,23),"Ar"), ((24,24),"Ar"),
+            ((15,20),"Ar"), ((16,19),"Ar"),
+
+            ((23,15),"Ar"), ((24,16),"Ar"),
+            ((23,7),"Ar"), ((24,8),"Ar"),
+            
+            ((23,2),"Iz"), ((24,1),"Iz"),
+            ((16,1),"Iz"), ((15,2),"Iz"),
+
+            ((1,13),"Ab"), ((2,14),"Ab"),
+            ((6,8),"Iz"), ((7,7),"Iz"),
+
+            ((13,24),"De"), ((14,23),"De"),
+
+            ((19,7),"De"), ((20,8),"De"),
+            ((19,8),"De"), ((20,7),"De"),
+
+            ((14,13),"Iz"), 
+            ((13,15),"Ab"),
+            ((15,16),"De"), 
+            ((16,14),"Ar"),
+        )
+        lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro) # La traducimos segun como Mesa la crea
+        lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro) # Y sacamos unicamente sus coordenadas, para asi estar revisnado si estamos o no en una celda de giro
+
+        lista_celdas_eleccion: Tuple[Tuple[int, int], Tuple[str, str]] = (
+            ((1,16), ("Ab","De")), ((2,15), ("Ab", "De")),
+            ((6,14), ("Ar","Iz")), ((7,13), ("Ar", "Iz")),
+            ((7,16), ("Ab","De")), ((8,15), ("Ab", "De")),
+            
+            ((13,1), ("Ab","Iz")), ((14,2), ("Ab", "Iz")),
+            ((13,7), ("Ab","Iz")), ((14,8), ("Ab", "Iz")),
+
+            ((15,7), ("Ar","De")), ((16,8), ("Ar", "De")),
+            ((15,23),("Ar","De")), ((16,24),("Ar", "De")),
+
+            ((19,1), ("Ab","Iz")), ((20,2), ("Ab", "Iz")),
+            ((19,14),("Ar","Iz")), ((20,13),("Ar", "Iz")),
+
+            ((23,14),("Ar","Iz")), ((24,13),("Ar", "Iz")),
+            ((23,20), ("Ar","Iz")), ((24,19), ("Ar", "Iz")),
+
+            ((13,13), ("Ab","Iz")),
+            ((13,16),("Ab", "De")),
+            ((16,13), ("Ar","Iz")),
+            ((16,16),("Ar", "De"))
+        )
+        lista_eleccion_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_eleccion) # La traducimos segun como Mesa la crea
+        lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
+
+        self.width = ancho
+        self.height = alto
+        self.num_autos = numero_autos
+        self.num_buses = numero_autobuses
+        self.list_esta = lista_estacionamientos
+        self.list_entr = lista_entradas
+        self.list_edif = lista_edificios
+        self.list_glor = lista_glorietas
+        self.list_sem = lista_semaforos
+        self.list_par = lista_paradas
+        self.list_alto = lista_alto_autobus
+        # self.list_primero = lista_primeros_pasos
+        self.list_primeros_traducida = lista_primeros_traducida
+        self.list_giros_t = lista_giros_traducida
+        self.list_giros_coor = lista_giros_coor
+        self.list_eleccion_t = lista_eleccion_traducida
+        self.list_eleccion_coor = lista_eleccion_coor
+
+
+
+        self.grid = MultiGrid(self.width, self.height, False)
         self.schedule = SimultaneousActivation(self)
         self.running = True # Para la visualizacion usando navegador
-        self.num_autos = num_autos
-        self.num_buses = num_buses
+        self.num_autos = numero_autos
+        self.num_buses = numero_autobuses
         id_agente = 0
         self.autos_destino = 0 
 
         # Construccion del Mapa
 
-        ## Edificios
-        for edificio in list_edif:
+        ## Crea los edificios
+        for edificio in self.list_edif:
             rango_x = edificio[1][0] - edificio[0][0] + 1
             rango_y = edificio[1][1] - edificio[0][1] + 1
             for i in range(rango_x):
@@ -328,30 +485,37 @@ class CiudadModel(Model):
                     id_agente += 1
         
         ## Glorietas
-        for glorieta in list_glor:
+        for glorieta in self.list_glor:
             new_glorieta = Glorieta(id_agente, self)
             self.grid.place_agent(new_glorieta, (traduccion(glorieta[0], glorieta[1])))
             self.schedule.add(new_glorieta)
             id_agente += 1
         
         ## Semaforos
-        for semaforos in list_sem:
+        for semaforos in self.list_sem:
             X = semaforos[0][0] -1
-            Y = height - semaforos[0][1]
+            Y = self.height - semaforos[0][1]
             new_semaforo = Semaforo(id_agente, self, semaforos[1])
             self.grid.place_agent(new_semaforo, (traduccion(semaforos[0][0], semaforos[0][1])))
             self.schedule.add(new_semaforo)
             id_agente += 1
         
         ## Estacionamientos
-        for estacionamiento in list_esta:
+        for estacionamiento in self.list_esta:
             new_estacionamiento = Estacionamiento(id_agente, self)
             self.grid.place_agent(new_estacionamiento, (traduccion(estacionamiento[0], estacionamiento[1])))
             self.schedule.add(new_estacionamiento)
             id_agente += 1
+
+        ## Entradas
+        for entrada in self.list_entr:
+            new_entrada = Entrada(id_agente, self)
+            self.grid.place_agent(new_entrada, (traduccion(entrada[0], entrada[1])))
+            self.schedule.add(new_entrada)
+            id_agente += 1
         
         ## Paradas
-        for parada in list_par:
+        for parada in self.list_par:
             new_parada = Parada(id_agente, self)
             self.grid.place_agent(new_parada, (traduccion(parada[0], parada[1])))
             self.schedule.add(new_parada)
@@ -360,9 +524,9 @@ class CiudadModel(Model):
         # Vehiculos
         ## Autos
         contador_autos = 0
-        for origen_auto in list_esta:
+        for origen_auto in self.list_esta:
             if contador_autos < self.num_autos:
-                new_destiny = random.choice([e for e in list_esta if e != origen_auto])
+                new_destiny = random.choice([e for e in self.list_entr if e != origen_auto])
                 new_auto = Auto(id_agente, self, origen_auto, new_destiny)
                 self.grid.place_agent(new_auto, (traduccion(origen_auto[0], origen_auto[1])))
                 self.schedule.add(new_auto)
@@ -371,8 +535,8 @@ class CiudadModel(Model):
             else:
                 break
         ## Autobuses
-        paradas = [parada[0] for parada in list_alto]
-        direcciones = [direccion[1] for direccion in list_alto]
+        paradas = [parada[0] for parada in self.list_alto]
+        direcciones = [direccion[1] for direccion in self.list_alto]
         for bus in range(self.num_buses):
                 numero_parada = i % len(paradas)    # En que indice de parada nacera
                 parada_autobus = paradas[numero_parada]
@@ -435,6 +599,14 @@ def agent_portrayal(agent):
                     "w": 1,
                     "h": 1
                     }
+    elif isinstance(agent, Entrada):
+        portrayal = {"Shape": "rect",
+                    "Filled": "true",
+                    "Layer": 0,
+                    "Color": "#00fff7",
+                    "w": 1,
+                    "h": 1
+                    }
     elif isinstance(agent, Glorieta):
         portrayal = {"Shape": "rect",
                     "Filled": "true",
@@ -481,7 +653,7 @@ def get_auto_info(model):
     info = []
     for agent in model.schedule.agents:
         if isinstance(agent, Auto):
-            info.append(f"Auto ID: {agent.unique_id}, Origen: {agent.origen} Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Estado: {agent.estado}")
+            info.append(f"Auto ID: {agent.unique_id}, Origen: {agent.origen} Destino: {agent.destino_or}, Posición: {agent.position}, Estado: {agent.estado}")
         elif isinstance(agent, Autobus):
             info.append(f"Autobus ID: {agent.unique_id},  Parada: {agent.indice_parada_actual}, Posición: {agent.pos_trad}, Dirección: {agent.direccion}, Estado: {agent.estado}")
     return info
@@ -496,143 +668,10 @@ class AutoInfoText(TextElement):
         return f'<div style="position: absolute; top: 70px; left: 10px; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{info_html}</div>'
 
 if __name__ == "__main__":
-    # Medidas
-    ancho = 24
-    alto = 24
-
-    # Mapa
-    lista_edificios: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
-        ((3,3),(12,6)),
-        ((17,3),(18,6)),
-        ((21,3),(22,6)), 
-        
-        ((3,9),(5,12)),
-        ((8,9),(12,12)),
-        ((17,9),(18,12)),
-        ((21,9),(22,12)),
-
-        ((3,17),(6,22)),
-        ((9,17),(12,22)),
-        ((17,17),(22,18)),
-        ((17,21),(22,22))
-    )
-
-    lista_estacionamientos: Tuple[Tuple[int, int]] = ( 
-        (10,3), (3,4), (18,4), (12,5), (21,5), (7,6),
-        (9,9), (22,10), (5,11), (12,11), (17,11),
-        (3,18), (18,18), (20,18), (6,21), (9,21), (20,21)
-    )
-
-    lista_glorietas: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
-        ((14,14),(15,14),(14,15),(15,15))
-    )
-
-    lista_semaforos: Tuple[Tuple[Tuple[int, int], str]] = (
-        ((17,1), "V"), ((17,2), "V"), ((15,3), "H"), ((16,3), "H"), ((8,7), "V"), ((8,8), "V"),
-        ((6,9), "H"), ((7,9), "H"), ((1,12), "H"), ((2,12), "H"), ((3,13), "V"), ((3,14), "V"),
-        ((22,15), "V"), ((22,16), "V"), ((23,17), "H"), ((24,17), "H"), 
-        ((15,21), "H"), ((16,21), "H"), ((13,22), "H"), ((14,22), "H"), ((12,23), "V"), ((12,24), "V")
-    )
-
-    # Coordenadas especiales
-    lista_primeros_pasos: Tuple[Tuple[int, int], str] = (
-        ((10,2),"Iz"), ((2,4),"Ab"), ((19,4),"Ab"), ((13,5),"Ab"),
-        ((20,5),"Ab"),((7,7),"Iz"),
-
-        ((9,8),"Iz"), ((23,10),"Ar"), ((6,11),"Ar"), ((13,11),"Ab"),
-        ((16,11),"Ar"), 
-
-        ((2,18),"Ab"), ((18,19),"Iz"), ((20,19),"Iz"), ((7,21),"Ab"),
-        ((8,21),"Ab"), ((20,20),"Iz")
-    )
-    lista_primeros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_primeros_pasos)
-
-    lista_celdas_giro: Tuple[Tuple[int, int], str] = (
-        ((1,1),"Ab"), ((2,2),"Ab"),
-        ((1,7),"Ab"), ((2,8),"Ab"),
-        ((1,24),"De"), ((2,23),"De"),
-
-        ((7,24),"De"), ((8,23),"De"),
-        ((23,23),"Ar"), ((24,24),"Ar"),
-        ((15,20),"Ar"), ((16,19),"Ar"),
-
-        ((23,15),"Ar"), ((24,16),"Ar"),
-        ((23,7),"Ar"), ((24,8),"Ar"),
-        
-        ((23,2),"Iz"), ((24,1),"Iz"),
-        ((16,1),"Iz"), ((15,2),"Iz"),
-
-        ((1,13),"Ab"), ((2,14),"Ab"),
-        ((6,8),"Iz"), ((7,7),"Iz"),
-
-        ((13,24),"De"), ((14,23),"De"),
-
-        ((19,7),"De"), ((20,8),"De"),
-        ((19,8),"De"), ((20,7),"De"),
-
-        ((14,13),"Iz"), 
-        ((13,15),"Ab"),
-        ((15,16),"De"), 
-        ((16,14),"Ar"),
-    )
-    lista_giros_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_giro) # La traducimos segun como Mesa la crea
-    lista_giros_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_giro) # Y sacamos unicamente sus coordenadas, para asi estar revisnado si estamos o no en una celda de giro
-
-    lista_celdas_eleccion: Tuple[Tuple[int, int], Tuple[str, str]] = (
-        ((1,16), ("Ab","De")), ((2,15), ("Ab", "De")),
-        ((6,14), ("Ar","Iz")), ((7,13), ("Ar", "Iz")),
-        ((7,16), ("Ab","De")), ((8,15), ("Ab", "De")),
-        
-        ((13,1), ("Ab","Iz")), ((14,2), ("Ab", "Iz")),
-        ((13,7), ("Ab","Iz")), ((14,8), ("Ab", "Iz")),
-
-        ((15,7), ("Ar","De")), ((16,8), ("Ar", "De")),
-        ((15,23),("Ar","De")), ((16,24),("Ar", "De")),
-
-        ((19,1), ("Ab","Iz")), ((20,2), ("Ab", "Iz")),
-        ((19,14),("Ar","Iz")), ((20,13),("Ar", "Iz")),
-
-        ((23,14),("Ar","Iz")), ((24,13),("Ar", "Iz")),
-        ((23,20), ("Ar","Iz")), ((24,19), ("Ar", "Iz")),
-
-        ((13,13), ("Ab","Iz")),
-        ((13,16),("Ab", "De")),
-        ((16,13), ("Ar","Iz")),
-        ((16,16),("Ar", "De"))
-    )
-    lista_eleccion_traducida = tuple((traduccion(tupla[0][0], tupla[0][1]), tupla[1]) for tupla in lista_celdas_eleccion) # La traducimos segun como Mesa la crea
-    lista_eleccion_coor = tuple(traduccion(tupla[0][0], tupla[0][1]) for tupla in lista_celdas_eleccion)
-
-    # Autobuses
-    # Lista de paradas que saldran en el Mapa
-    lista_paradas: Tuple[Tuple[int, int]] = ( 
-        (3,21), (5,3), (9,12), (10,6), (20,17), (21,22), (22,4)
-    )
-
-    # Lista de coordenadas donde el autobus se detendra un momento
-    lista_alto_autobus: Tuple[Tuple[int, int], str] = ( 
-        ((2,21), "Ab"), ((5,2), "Iz"), ((9,13), "Iz"), 
-        ((10,7), "Iz"), ((20,16), "De"), ((21,23), "De"), 
-        ((23,4), "Ar")
-    )
-
-    # Autos
-    numero_autos = 17        # Maximo 17, uno en cada estacionamiento
-    numero_autobuses = 1    # Maximo 7, uno en cada parada
-
     info_text = AutoInfoText()
-    grid = CanvasGrid(agent_portrayal, ancho, alto, 720, 720)
+    grid = CanvasGrid(agent_portrayal, 24, 24, 720, 720)
     server = ModularServer(CiudadModel,
                         [grid, info_text],
-                        "Ciudad Model",
-                        {"width": ancho, "height": alto, 
-                        "num_autos": numero_autos,
-                        "list_edif": lista_edificios,
-                        "list_esta": lista_estacionamientos,
-                        "list_glor": lista_glorietas,
-                        "list_sem": lista_semaforos,
-                        "num_buses": numero_autobuses,
-                        "list_par": lista_paradas,
-                        "list_alto": lista_alto_autobus})
+                        "Ciudad Model")
     server.port = 8521 # The default
     server.launch()
