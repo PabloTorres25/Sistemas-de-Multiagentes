@@ -25,7 +25,7 @@ class Auto(Agent):
         self.primer_paso = False
         self.direccion = ""
         self.estado = "Inicio"
-        self.position = origen
+        self.position = self.pos
         self.llego_a_destino = False
 
         self.destino_ala_vista = (
@@ -81,7 +81,6 @@ class Auto(Agent):
                 # AVANZA
                 self.estado = "Avanzando"
                 self.model.grid.move_agent(self, new_pos)
-                self.position = (self.position[0] + movimiento[0], self.position[1] + movimiento[1])
                 return True
         else:
             # El siguiente paso se sale del mapa
