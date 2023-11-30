@@ -494,6 +494,7 @@ class CiudadModel(Model):
         self.id_agente = 0
         self.autos_destino = 0
         self.paso_actual = 0
+        self.total_autos = 0
 
         # Construccion del Mapa
 
@@ -558,6 +559,7 @@ class CiudadModel(Model):
                 self.schedule.add(new_auto)
                 self.id_agente += 1
                 contador_autos += 1
+                self.total_autos += 1
             else:
                 break
         ## Autobuses
@@ -581,8 +583,10 @@ class CiudadModel(Model):
         for agente in self.schedule.agents:
             if isinstance(agente, Auto) and agente.llego_a_destino:
                 self.remover_agente(agente)
+                self.total_autos -= 1
         
-        self.generar_nuevo_auto(2, 10)
+        if self.total_autos < 50:
+            self.generar_nuevo_auto(2, 10)
     
     def generar_nuevo_auto(self, nacimientos, entre_pasos_nacimientos):
         """
@@ -603,6 +607,7 @@ class CiudadModel(Model):
                 self.grid.place_agent(new_auto, (traduccion(origen_auto[0], origen_auto[1])))
                 self.schedule.add(new_auto)
                 self.id_agente += 1
+                self.total_autos += 1
         
         self.paso_actual += 1
         
