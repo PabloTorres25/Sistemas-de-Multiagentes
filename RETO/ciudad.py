@@ -165,8 +165,9 @@ class Auto(Agent):
             elif tuple(pos_list) in self.model.list_eleccion_coor:
                 if self.step_quieto == 0:
                     self.step_quieto += 1
-                else:
+                    self.estado = "Girando"
                     self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
+                else:
                     self.step_quieto = 0
                     moved = self.avanza_con_precaucion()
 
