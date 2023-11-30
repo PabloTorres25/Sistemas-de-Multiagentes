@@ -52,8 +52,8 @@ class Auto(Agent):
         pos_list = tuple(pos_list)
         for coor, direccion in lista_celdas:
             if pos_list == coor:
-                return direccion # Se queda quieto un segundo, para simular que gira (Aunque no se vea)
-        return None # O retorna un valor predeterminado si no encuentra una coincidencia
+                return direccion
+        return None
     
     def girar_con_opciones(self, pos_list, lista_celdas):
         pos_list = tuple(pos_list)
@@ -189,8 +189,7 @@ class Autobus(Agent):
         self.direccion = direccion
         self.estado = "Inicio"
         self.pos_trad = (self.pos)
-        self.ya_gire = False
-        self.ya_elegi = False
+        self.step_quieto = 0 
         
         self.movimientos_direccion = {
             "Ar": (0, 1),   # Arriba
@@ -271,31 +270,27 @@ class Autobus(Agent):
             # Si hay una vuelta
             elif tuple(pos_list) in self.model.list_giros_coor:
                 # Gira
-                if self.direccion != self.girar_sin_opcion(pos_list, self.model.list_giros_t):
-                    if self.ya_gire == False:
-                        self.estado = "Girando"
-                        self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
-                        self.ya_gire = True
-                    elif self.ya_gire == True: 
-                        moved = self.avanza_con_precaucion()
-                        self.ya_gire = False
-                else:
+                # Si tu direccion ya es la que deberias tener solo avanza
+                if self.direccion == self.girar_sin_opcion(pos_list, self.model.list_giros_t):
                     moved = self.avanza_con_precaucion()
+                # Si tienes otra dirección, gira
+                # Ya en el siguiente step avanzaras
+                else:
+                    self.estado = "Girando"
+                    self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
 
             # Si hay una decisión
             elif tuple(pos_list) in self.model.list_eleccion_coor:
                 # Escoge
-                nueva_direccion = self.girar_con_opciones(pos_list, self.model.list_giros_t)
-                if self.direccion != nueva_direccion:
-                    if self.ya_elegi == False:
-                        self.estado = "Eligiendo"
-                        self.direccion = nueva_direccion
-                        self.ya_elegi = True
-                    elif self.ya_elegi == True:
-                        moved = self.avanza_con_precaucion()
-                        self.ya_elegi = False
+                if self.step_quieto == 0:
+                    self.step_quieto += 1
+                    self.estado = "Girando"
+                    self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
                 else:
+                    self.step_quieto = 0
                     moved = self.avanza_con_precaucion()
+            else:
+                moved = self.avanza_con_precaucion()
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -347,7 +342,7 @@ class CiudadModel(Model):
         ancho = 24
         alto = 24
         # Autos
-        numero_autos = 17       # Maximo 17, uno en cada estacionamiento
+        numero_autos = 1       # Maximo 17, uno en cada estacionamiento
         numero_autobuses = 0    # Maximo 7, uno en cada parada
 
         # Mapa
@@ -496,8 +491,9 @@ class CiudadModel(Model):
         self.running = True # Para la visualizacion usando navegador
         self.num_autos = numero_autos
         self.num_buses = numero_autobuses
-        id_agente = 0
-        self.autos_destino = 0 
+        self.id_agente = 0
+        self.autos_destino = 0
+        self.paso_actual = 0
 
         # Construccion del Mapa
 
@@ -507,47 +503,47 @@ class CiudadModel(Model):
             rango_y = edificio[1][1] - edificio[0][1] + 1
             for i in range(rango_x):
                 for j in range(rango_y):
-                    new_edificio = Edificio(id_agente, self)
+                    new_edificio = Edificio(self.id_agente, self)
                     self.grid.place_agent(new_edificio, (traduccion((edificio[0][0] + i), (edificio[0][1] + j))))
                     self.schedule.add(new_edificio)
-                    id_agente += 1
+                    self.id_agente += 1
         
         ## Glorietas
         for glorieta in self.list_glor:
-            new_glorieta = Glorieta(id_agente, self)
+            new_glorieta = Glorieta(self.id_agente, self)
             self.grid.place_agent(new_glorieta, (traduccion(glorieta[0], glorieta[1])))
             self.schedule.add(new_glorieta)
-            id_agente += 1
+            self.id_agente += 1
         
         ## Semaforos
         for semaforos in self.list_sem:
             X = semaforos[0][0] -1
             Y = self.height - semaforos[0][1]
-            new_semaforo = Semaforo(id_agente, self, semaforos[1])
+            new_semaforo = Semaforo(self.id_agente, self, semaforos[1])
             self.grid.place_agent(new_semaforo, (traduccion(semaforos[0][0], semaforos[0][1])))
             self.schedule.add(new_semaforo)
-            id_agente += 1
+            self.id_agente += 1
         
         ## Estacionamientos
         for estacionamiento in self.list_esta:
-            new_estacionamiento = Estacionamiento(id_agente, self)
+            new_estacionamiento = Estacionamiento(self.id_agente, self)
             self.grid.place_agent(new_estacionamiento, (traduccion(estacionamiento[0], estacionamiento[1])))
             self.schedule.add(new_estacionamiento)
-            id_agente += 1
+            self.id_agente += 1
 
         ## Entradas
         for entrada in self.list_entr:
-            new_entrada = Entrada(id_agente, self)
+            new_entrada = Entrada(self.id_agente, self)
             self.grid.place_agent(new_entrada, (traduccion(entrada[0], entrada[1])))
             self.schedule.add(new_entrada)
-            id_agente += 1
+            self.id_agente += 1
         
         ## Paradas
         for parada in self.list_par:
-            new_parada = Parada(id_agente, self)
+            new_parada = Parada(self.id_agente, self)
             self.grid.place_agent(new_parada, (traduccion(parada[0], parada[1])))
             self.schedule.add(new_parada)
-            id_agente += 1
+            self.id_agente += 1
         
         # Vehiculos
         ## Autos
@@ -556,11 +552,11 @@ class CiudadModel(Model):
             if contador_autos < self.num_autos:
 
                 new_destiny = random.choice([e for e in self.list_entr if e != origen_auto])
-                new_auto = Auto(id_agente, self, origen_auto, new_destiny)
+                new_auto = Auto(self.id_agente, self, origen_auto, new_destiny)
 
                 self.grid.place_agent(new_auto, (traduccion(origen_auto[0], origen_auto[1])))
                 self.schedule.add(new_auto)
-                id_agente += 1
+                self.id_agente += 1
                 contador_autos += 1
             else:
                 break
@@ -571,10 +567,10 @@ class CiudadModel(Model):
                 numero_parada = i % len(paradas)    # En que indice de parada nacera
                 parada_autobus = paradas[numero_parada]
                 direccion_autobus = direcciones[i]
-                new_bus = Autobus(id_agente, self, direccion_autobus, paradas, numero_parada)
+                new_bus = Autobus(self.id_agente, self, direccion_autobus, paradas, numero_parada)
                 self.grid.place_agent(new_bus, (traduccion(parada_autobus[0], parada_autobus[1])))
                 self.schedule.add(new_bus)
-                id_agente += 1
+                self.id_agente += 1
 
     def step(self):
         # Hacer avanzar el modelo
@@ -585,6 +581,31 @@ class CiudadModel(Model):
         for agente in self.schedule.agents:
             if isinstance(agente, Auto) and agente.llego_a_destino:
                 self.remover_agente(agente)
+        
+        self.generar_nuevo_auto(2, 5)
+    
+    def generar_nuevo_auto(self, nacimientos, entre_pasos_nacimientos):
+        """
+        Genera nuevos autos en la simulación.
+
+        Args:
+        - nacimientos: Número de autos a crear por ciclo.
+        - entre_pasos_nacimientos: Número de pasos entre la creación de autos.
+        """
+
+        if self.paso_actual > 1 and self.paso_actual % entre_pasos_nacimientos == 0:
+            origenes_auto = random.choices(self.list_esta, k=nacimientos)
+            for origen_auto in origenes_auto:
+                new_destiny = random.choice([e for e in self.list_entr if e != origen_auto])
+
+                new_auto = Auto(self.id_agente, self, origen_auto, new_destiny)
+
+                self.grid.place_agent(new_auto, (traduccion(origen_auto[0], origen_auto[1])))
+                self.schedule.add(new_auto)
+                self.id_agente += 1
+        
+        self.paso_actual += 1
+        
 
     def verificar_autos_llegados(self):
         autos_destino = sum(1 for agent in self.schedule.agents if isinstance(agent, Auto) and agent.destino_bool)
