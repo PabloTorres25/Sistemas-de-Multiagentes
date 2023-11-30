@@ -25,8 +25,11 @@ class Auto(Agent):
         self.primer_paso = False
         self.direccion = ""
         self.estado = "Inicio"
-        self.position = origen
+        self.pos_trad = (self.pos)
         self.llego_a_destino = False
+        self.ya_gire = False
+        self.ya_elegi = False
+        self.nueva_direccion = None
 
         self.destino_ala_vista = (
                 ((self.destino[0], self.destino[1] + 1), "Ab"),   # Arriba
@@ -64,7 +67,6 @@ class Auto(Agent):
     
     def avanza_con_precaucion(self):
         x, y = self.pos
-        pos_list2 = [x,y]
         movimiento = self.movimientos_direccion[self.direccion] # Avanza uno en la dirección del agente
         new_pos = (x + movimiento[0], y + movimiento[1])
         # Si tu siguiente celda no se sale del mapa
@@ -82,8 +84,6 @@ class Auto(Agent):
                 # AVANZA
                 self.estado = "Avanzando"
                 self.model.grid.move_agent(self, new_pos)
-                pos_list2 = (pos_list2[0] + movimiento[0], pos_list2[1] + movimiento[1])
-                self.position = traduccion2(pos_list2[0], pos_list2[1])
                 return True
         else:
             # El siguiente paso se sale del mapa
@@ -93,6 +93,7 @@ class Auto(Agent):
     def step(self):
         x, y = self.pos
         pos_list = [x,y]
+        self.pos_trad = traduccion2(x,y)
 
         # Llegaste a destino
         if tuple(pos_list) == self.destino:
@@ -116,7 +117,6 @@ class Auto(Agent):
                         self.estado = "Saliendo Estacionamiento"
                         self.model.grid.move_agent(self, new_pos)   # SAL
                         pos_list = (pos_list[0] + move[0], pos_list[1] + move[1])
-                        self.position = traduccion2(pos_list[0], pos_list[1])
                         self.direccion = self.girar_sin_opcion(pos_list, self.model.list_primeros_traducida) # Toma una dirección
                         break
 
@@ -150,18 +150,28 @@ class Auto(Agent):
                     else:   # Verde, Avanza
                         self.estado = "En semaforo(verde)"
                         moved = self.avanza_con_precaucion()
+
             # Si hay una vuelta
             elif tuple(pos_list) in self.model.list_giros_coor:
                 # Gira
-                self.estado = "celda de giro"
-                self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
-                moved = self.avanza_con_precaucion()
+                # Si tu direccion ya es la que deberias tener solo avanza
+                if self.direccion == self.girar_sin_opcion(pos_list, self.model.list_giros_t):
+                    moved = self.avanza_con_precaucion()
+                # Si tienes otra dirección, gira
+                # Ya en el siguiente step avanzaras
+                else:
+                    self.estado = "Girando"
+                    self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
+
             # Si hay una decisión
             elif tuple(pos_list) in self.model.list_eleccion_coor:
                 # Escoge
-                self.estado = "celda de eleccion"
-                self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
-                moved = self.avanza_con_precaucion()
+                if self.estado == "Avanzando":
+                    self.estado = "Eligiendo" 
+                    self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
+                elif self.estado == "Eligiendo":
+                    moved = self.avanza_con_precaucion()
+
             # Si no hay nada de lo anterior, avanza
             else:
                 moved = self.avanza_con_precaucion()
@@ -179,6 +189,8 @@ class Autobus(Agent):
         self.direccion = direccion
         self.estado = "Inicio"
         self.pos_trad = (self.pos)
+        self.ya_gire = False
+        self.ya_elegi = False
         
         self.movimientos_direccion = {
             "Ar": (0, 1),   # Arriba
@@ -255,22 +267,35 @@ class Autobus(Agent):
                     else:   # Verde, Avanza
                         self.estado = "En semaforo(verde)"
                         moved = self.avanza_con_precaucion()
-
+            
             # Si hay una vuelta
             elif tuple(pos_list) in self.model.list_giros_coor:
                 # Gira
-                self.estado = "celda de giro"
-                self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
-                moved = self.avanza_con_precaucion()
+                if self.direccion != self.girar_sin_opcion(pos_list, self.model.list_giros_t):
+                    if self.ya_gire == False:
+                        self.estado = "Girando"
+                        self.direccion = self.girar_sin_opcion(pos_list, self.model.list_giros_t)
+                        self.ya_gire = True
+                    elif self.ya_gire == True: 
+                        moved = self.avanza_con_precaucion()
+                        self.ya_gire = False
+                else:
+                    moved = self.avanza_con_precaucion()
+
             # Si hay una decisión
             elif tuple(pos_list) in self.model.list_eleccion_coor:
                 # Escoge
-                self.estado = "celda de eleccion"
-                self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
-                moved = self.avanza_con_precaucion()
-            # Si no hay nada de lo anterior, avanza
-            else:
-                moved = self.avanza_con_precaucion()
+                nueva_direccion = self.girar_con_opciones(pos_list, self.model.list_giros_t)
+                if self.direccion != nueva_direccion:
+                    if self.ya_elegi == False:
+                        self.estado = "Eligiendo"
+                        self.direccion = nueva_direccion
+                        self.ya_elegi = True
+                    elif self.ya_elegi == True:
+                        moved = self.avanza_con_precaucion()
+                        self.ya_elegi = False
+                else:
+                    moved = self.avanza_con_precaucion()
 
 class Edificio(Agent):
     def __init__(self, unique_id, model):
@@ -322,8 +347,8 @@ class CiudadModel(Model):
         ancho = 24
         alto = 24
         # Autos
-        numero_autos = 1        # Maximo 17, uno en cada estacionamiento
-        numero_autobuses = 1    # Maximo 7, uno en cada parada
+        numero_autos = 17        # Maximo 17, uno en cada estacionamiento
+        numero_autobuses = 0    # Maximo 7, uno en cada parada
 
         # Mapa
         lista_edificios: Tuple[Tuple[Tuple[int, int], Tuple[int, int]]] = (
@@ -529,8 +554,10 @@ class CiudadModel(Model):
         contador_autos = 0
         for origen_auto in self.list_esta:
             if contador_autos < self.num_autos:
+
                 new_destiny = random.choice([e for e in self.list_entr if e != origen_auto])
                 new_auto = Auto(id_agente, self, origen_auto, new_destiny)
+
                 self.grid.place_agent(new_auto, (traduccion(origen_auto[0], origen_auto[1])))
                 self.schedule.add(new_auto)
                 id_agente += 1
@@ -568,6 +595,26 @@ class CiudadModel(Model):
     def remover_agente(self, agente):
         self.schedule.remove(agente)
         self.grid.remove_agent(agente)
+    
+    def posicionesAgentes(self):
+        result = {"autos": []}
+        for agent in self.schedule.agents:
+            if isinstance(agent, Auto):
+                if agent.estado == "Saliendo Estacionamiento":  # JSON cuando de primeros pasos
+                    result["autos"].append({ "ID": agent.unique_id, "Origen": agent.pos,
+                                            "Direccion": agent.direccion, "AltoSiguiente": agent.estado})
+                elif agent.estado == "Vehiculo enfrente":       # JSON cuando detecte un coche enfrente
+                    result["autos"].append({ "ID": agent.unique_id, "Origen": agent.pos,
+                                            "Direccion": agent.direccion, "AltoSiguiente": agent.estado})
+                elif agent.estado == "En semaforo(rojo)":       # JSON cuando detecte un semáforo
+                    result["autos"].append({ "ID": agent.unique_id, "Origen": agent.pos,
+                                            "Direccion": agent.direccion, "AltoSiguiente": agent.estado})
+                elif agent.estado == "Destino":                 # JSON cuando llegue al destino
+                    result["autos"].append({ "ID": agent.unique_id, "Origen": (0,0),
+                                            "Direccion": agent.direccion, "AltoSiguiente": agent.estado})
+                else:                                       # en movimiento 
+                    result["autos"].append({"ID": agent.unique_id})
+        return result
 
 def agent_portrayal(agent):
     if isinstance(agent, Auto):
@@ -656,7 +703,7 @@ def get_auto_info(model):
     info = []
     for agent in model.schedule.agents:
         if isinstance(agent, Auto):
-            info.append(f"Auto ID: {agent.unique_id}, Origen: {agent.origen} Destino: {agent.destino_or}, Posición: {agent.position}, Estado: {agent.estado}")
+            info.append(f"Auto ID: {agent.unique_id}, Origen: {agent.origen} Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Estado: {agent.estado}, Dirección: {agent.direccion}")
         elif isinstance(agent, Autobus):
             info.append(f"Autobus ID: {agent.unique_id},  Parada: {agent.indice_parada_actual}, Posición: {agent.pos_trad}, Dirección: {agent.direccion}, Estado: {agent.estado}")
     return info
@@ -668,13 +715,4 @@ class AutoInfoText(TextElement):
     def render(self, model):
         info = get_auto_info(model)
         info_html = ''.join([f'<div>{line}</div> <div>&nbsp;</div>' for line in info])
-        return f'<div style="position: absolute; top: 70px; left: 10px; max-width: 350px; overflow: hidden; text-overflow: ellipsis;">{info_html}</div>'
-
-if __name__ == "__main__":
-    info_text = AutoInfoText()
-    grid = CanvasGrid(agent_portrayal, 24, 24, 720, 720)
-    server = ModularServer(CiudadModel,
-                        [grid, info_text],
-                        "Ciudad Model")
-    server.port = 8521 # The default
-    server.launch()
+        return f'<div style="position: absolute; top: 70px; left: 10px; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{info_html}</div>'
