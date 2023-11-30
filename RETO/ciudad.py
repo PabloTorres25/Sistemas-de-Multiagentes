@@ -163,6 +163,7 @@ class Auto(Agent):
 
             # Si hay una decisión
             elif tuple(pos_list) in self.model.list_eleccion_coor:
+                # Escoge
                 if self.step_quieto == 0:
                     self.step_quieto += 1
                     self.estado = "Girando"
@@ -170,13 +171,6 @@ class Auto(Agent):
                 else:
                     self.step_quieto = 0
                     moved = self.avanza_con_precaucion()
-
-                # Escoge
-                # if self.estado == "Avanzando":
-                #     self.estado = "Eligiendo" 
-                #     self.direccion = self.girar_con_opciones(pos_list, self.model.list_eleccion_t)
-                # elif self.estado == "Eligiendo":
-                #     moved = self.avanza_con_precaucion()
 
             # Si no hay nada de lo anterior, avanza
             else:
@@ -353,7 +347,7 @@ class CiudadModel(Model):
         ancho = 24
         alto = 24
         # Autos
-        numero_autos = 17        # Maximo 17, uno en cada estacionamiento
+        numero_autos = 17       # Maximo 17, uno en cada estacionamiento
         numero_autobuses = 0    # Maximo 7, uno en cada parada
 
         # Mapa
