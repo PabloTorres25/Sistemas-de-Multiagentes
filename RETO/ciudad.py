@@ -582,7 +582,7 @@ class CiudadModel(Model):
             if isinstance(agente, Auto) and agente.llego_a_destino:
                 self.remover_agente(agente)
         
-        self.generar_nuevo_auto(2, 5)
+        self.generar_nuevo_auto(2, 10)
     
     def generar_nuevo_auto(self, nacimientos, entre_pasos_nacimientos):
         """
@@ -722,11 +722,14 @@ def agent_portrayal(agent):
 
 def get_auto_info(model):
     info = []
+    total_autos = 0
     for agent in model.schedule.agents:
         if isinstance(agent, Auto):
             info.append(f"Auto ID: {agent.unique_id}, Origen: {agent.origen} Destino: {agent.destino_or}, Posición: {agent.pos_trad}, Estado: {agent.estado}, Dirección: {agent.direccion}")
+            total_autos += 1
         elif isinstance(agent, Autobus):
             info.append(f"Autobus ID: {agent.unique_id},  Parada: {agent.indice_parada_actual}, Posición: {agent.pos_trad}, Dirección: {agent.direccion}, Estado: {agent.estado}")
+    info.insert(0, f"Total de autos: {total_autos}")
     return info
 
 class AutoInfoText(TextElement):
